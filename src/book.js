@@ -131,8 +131,9 @@
     var newRight = inner(doc.getElementById('page-right'));
 
     // Llevar el libro a la vista antes de pasar la hoja
-    var top = spread.getBoundingClientRect().top;
-    if (top < 0) window.scrollTo({ top: window.scrollY + top - 12, behavior: 'instant' });
+    // (se alinea el libro entero, con su marco, no solo la hoja)
+    var bookTop = (spread.closest('.book') || spread).getBoundingClientRect().top;
+    if (bookTop < 16) window.scrollTo({ top: Math.max(0, window.scrollY + bookTop - 16), behavior: 'instant' });
 
     if (reduce.matches) {
       fill(left(), newLeft);
