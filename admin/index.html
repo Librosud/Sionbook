@@ -361,6 +361,11 @@ function siteView() {
   return h('div', { class: 'card' },
     h('h3', {}, 'Datos generales'),
     h('div', { class: 'grid2' }, field('Editor', s, 'editor'), field('Correo de contacto', s, 'email', { type: 'email' })),
+    h('h3', {}, 'Formulario de contacto'),
+    h('div', { class: 'grid2' },
+      field('Enlace del formulario', s, 'contactEndpoint', { hint: 'Formspree o Web3Forms', placeholder: 'https://formspree.io/f/xxxxxxxx' }),
+      field('Clave pública de Web3Forms', s, 'contactAccessKey', { hint: 'solo si usas Web3Forms' })),
+    h('p', { class: 'note' }, 'Mientras el enlace esté vacío, la página de contacto solo muestra el botón de correo. Al pegarlo, aparece el formulario.'),
     h('h3', {}, 'Textos por idioma'),
     h('div', { class: 'grid2' }, col('es'), col('pt')));
 }

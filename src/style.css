@@ -261,6 +261,26 @@ html.js .js-only { display: flex; }
 .fineprint { font-size: .88rem; color: var(--muted); }
 
 .cta { display: inline-block; margin-top: .4rem; }
+
+/* Formulario de contacto y texto legal */
+.contact-form { display: grid; gap: 1rem; max-width: 34rem; margin: 0 0 1.4rem; }
+.contact-form .f { display: grid; gap: .3rem; font-variant: small-caps; letter-spacing: .06em; color: var(--muted); }
+.contact-form input, .contact-form textarea {
+  font: inherit; font-variant: normal; letter-spacing: 0; color: var(--ink); background: #fff;
+  border: 1px solid var(--rule); border-radius: 6px; padding: .6rem .75rem; width: 100%;
+}
+.contact-form input:focus, .contact-form textarea:focus { outline: 2px solid #0a3df044; border-color: var(--accent); }
+.contact-form textarea { resize: vertical; min-height: 9rem; }
+.contact-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.contact-form button { justify-self: start; cursor: pointer; border: 1px solid #001a8a; font: inherit; }
+.contact-form button:disabled { opacity: .6; cursor: wait; }
+.form-status { margin: 0; min-height: 1.4em; font-size: .98rem; }
+.form-status.is-ok { color: #0a7a3d; }
+.form-status.is-err { color: #b42318; }
+.alt-mail { color: var(--muted); }
+.priv-link { color: inherit; }
+.legal h2 { font-size: 1.2rem; margin: 1.6rem 0 .4rem; }
+.legal p { text-align: left; hyphens: auto; }
 .link-arrow { font-weight: 600; }
 
 /* ---------- Folio (pie de página del libro) ---------- */

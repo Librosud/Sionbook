@@ -1,0 +1,105 @@
+{
+  "updated": "2026-10-06",
+  "es": {
+    "title": "Política de privacidad",
+    "updatedLabel": "Última actualización",
+    "intro": "Esta página explica qué datos personales trata Sion Book cuando visitas este sitio o nos escribes, para qué los usamos y qué derechos tienes.",
+    "sections": [
+      {
+        "h": "Quién es el responsable",
+        "p": ["Sion Book es una editorial independiente dirigida por Lucas Calveiro (Editor General). Para cualquier asunto sobre tus datos puedes escribir a {email}."]
+      },
+      {
+        "h": "Qué datos tratamos y para qué",
+        "p": [
+          "Formulario de contacto: si nos escribes, recibimos tu nombre, tu correo electrónico y el contenido de tu mensaje. Los usamos únicamente para responderte. La base es tu consentimiento al enviar el formulario y nuestro interés legítimo en atender consultas.",
+          "Datos técnicos: como cualquier sitio web, el servicio de alojamiento registra de forma automática datos como la dirección IP, el navegador y la fecha de acceso. Se usan para el funcionamiento y la seguridad del sitio.",
+          "No pedimos que crees una cuenta ni vendemos libros directamente en este sitio: las compras se completan en Amazon o Google Play Libros, bajo sus propias políticas."
+        ]
+      },
+      {
+        "h": "Cookies y seguimiento",
+        "p": ["Este sitio no usa cookies de publicidad, de análisis ni de seguimiento. Si en el futuro añadimos alguna herramienta de este tipo, lo indicaremos aquí y pediremos tu consentimiento cuando corresponda."]
+      },
+      {
+        "h": "Servicios externos que intervienen",
+        "p": [
+          "Alojamiento: el sitio se publica en Vercel Inc. (Estados Unidos).",
+          "Formulario de contacto: los mensajes los recibe y reenvía un servicio externo de formularios (Formspree o Web3Forms).",
+          "Tiendas: los botones de compra te llevan a Amazon o a Google Play Libros. Al salir de este sitio rigen sus políticas de privacidad.",
+          "Algunos de estos proveedores están fuera de tu país; en esos casos se apoyan en garantías habituales para las transferencias internacionales de datos."
+        ]
+      },
+      {
+        "h": "Cuánto tiempo conservamos los datos",
+        "p": ["Conservamos tus mensajes el tiempo necesario para atender tu consulta y, como máximo, 24 meses desde el último contacto, salvo que una obligación legal exija conservarlos más tiempo."]
+      },
+      {
+        "h": "Tus derechos",
+        "p": [
+          "Puedes pedir acceso a tus datos, su rectificación o supresión, oponerte a su tratamiento, solicitar su limitación o portabilidad y retirar tu consentimiento en cualquier momento, conforme a la normativa aplicable en tu país (RGPD, LGPD u otra equivalente).",
+          "Para ejercer estos derechos escribe a {email}. Si consideras que no hemos atendido tu solicitud, puedes reclamar ante la autoridad de protección de datos de tu país."
+        ]
+      },
+      {
+        "h": "Menores de edad",
+        "p": ["Este sitio no está dirigido a menores de edad y no recogemos sus datos de forma intencionada."]
+      },
+      {
+        "h": "Cambios en esta política",
+        "p": ["Podemos actualizar esta página cuando cambie el sitio o la normativa. La fecha de la última actualización aparece arriba."]
+      }
+    ]
+  },
+  "pt": {
+    "title": "Política de privacidade",
+    "updatedLabel": "Última atualização",
+    "intro": "Esta página explica quais dados pessoais a Sion Book trata quando você visita este site ou nos escreve, para que os usamos e quais são os seus direitos.",
+    "sections": [
+      {
+        "h": "Quem é o responsável",
+        "p": ["A Sion Book é uma editora independente dirigida por Lucas Calveiro (Editor Geral). Para qualquer assunto sobre os seus dados, escreva para {email}."]
+      },
+      {
+        "h": "Quais dados tratamos e para quê",
+        "p": [
+          "Formulário de contato: se você nos escrever, recebemos o seu nome, o seu e-mail e o conteúdo da mensagem. Usamos esses dados somente para responder a você. A base é o seu consentimento ao enviar o formulário e o nosso interesse legítimo em atender consultas.",
+          "Dados técnicos: como qualquer site, o serviço de hospedagem registra automaticamente dados como o endereço IP, o navegador e a data de acesso. Eles são usados para o funcionamento e a segurança do site.",
+          "Não pedimos que você crie uma conta nem vendemos livros diretamente neste site: as compras são concluídas na Amazon ou no Google Play Livros, sob as políticas de cada uma."
+        ]
+      },
+      {
+        "h": "Cookies e rastreamento",
+        "p": ["Este site não usa cookies de publicidade, de análise nem de rastreamento. Se no futuro adicionarmos alguma ferramenta desse tipo, informaremos aqui e pediremos o seu consentimento quando for o caso."]
+      },
+      {
+        "h": "Serviços externos envolvidos",
+        "p": [
+          "Hospedagem: o site é publicado na Vercel Inc. (Estados Unidos).",
+          "Formulário de contato: as mensagens são recebidas e encaminhadas por um serviço externo de formulários (Formspree ou Web3Forms).",
+          "Lojas: os botões de compra levam você à Amazon ou ao Google Play Livros. Ao sair deste site, valem as políticas de privacidade delas.",
+          "Alguns desses fornecedores estão fora do seu país; nesses casos, eles se apoiam em garantias usuais para a transferência internacional de dados."
+        ]
+      },
+      {
+        "h": "Por quanto tempo guardamos os dados",
+        "p": ["Guardamos as suas mensagens pelo tempo necessário para atender a sua consulta e, no máximo, 24 meses a partir do último contato, salvo se uma obrigação legal exigir guardá-las por mais tempo."]
+      },
+      {
+        "h": "Seus direitos",
+        "p": [
+          "Você pode pedir acesso aos seus dados, a correção ou a eliminação deles, opor-se ao tratamento, solicitar a limitação ou a portabilidade e retirar o consentimento a qualquer momento, conforme a legislação aplicável no seu país (LGPD, RGPD ou outra equivalente).",
+          "Para exercer esses direitos, escreva para {email}. Se considerar que não atendemos ao seu pedido, você pode reclamar à autoridade de proteção de dados do seu país."
+        ]
+      },
+      {
+        "h": "Menores de idade",
+        "p": ["Este site não é dirigido a menores de idade e não coletamos dados deles de forma intencional."]
+      },
+      {
+        "h": "Alterações nesta política",
+        "p": ["Podemos atualizar esta página quando o site ou a legislação mudarem. A data da última atualização aparece acima."]
+      }
+    ]
+  }
+}

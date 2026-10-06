@@ -15,6 +15,7 @@ const books = JSON.parse(read('data/books.json'));
 const upcoming = fs.existsSync(path.join(root, 'data/proximas.json')) ? JSON.parse(read('data/proximas.json')) : [];
 const today = new Date();
 const year = today.getFullYear();
+const privacy = fs.existsSync(path.join(root, 'data/privacy.json')) ? JSON.parse(read('data/privacy.json')) : null;
 const LANGS = ['es', 'pt'];
 // Un libro (o próxima obra) aparece en los idiomas de su campo `languages`; sin el campo, en todos
 const inLang = (item, lang) => !item.languages || item.languages.includes(lang);
@@ -43,7 +44,8 @@ const T = {
     upcDesc: (list) => `Próximas obras de ${site.name}: ${list}.`, seeCatalog: 'Ver el catálogo →', exploreCat: 'Explora el catálogo →',
     aboutTitle: 'La editorial', aboutDesc: `Conoce ${site.name}, editorial independiente de libros en español y portugués dirigida por ${site.editor}.`,
     contactTitle: 'Contacto', contactDesc: `Escribe a ${site.name} para consultas sobre libros, prensa, distribución o colaboraciones.`, writeTo: 'Escríbenos a',
-    langAria: 'Idioma de la web', switchTo: 'Leer en portugués', openToc: 'Abrir la hoja izquierda del libro', booksLabel: 'Libros', backToc: 'Índice',
+    langAria: 'Idioma de la web', switchTo: 'Leer en portugués', openToc: 'Abrir la hoja izquierda del libro', booksLabel: 'Libros', backToc: 'Índice', privacy: 'Política de privacidad',
+    form: { name: 'Nombre', email: 'Correo electrónico', message: 'Mensaje', send: 'Enviar mensaje', ok: 'Gracias. Recibimos tu mensaje y te responderemos pronto.', err: 'No se pudo enviar. Inténtalo de nuevo o escribe directamente al correo.', or: 'o escríbenos directamente', consent: 'Al enviar este formulario aceptas que usemos tus datos para responderte, según nuestra' },
     languages: { 'español': 'Español', 'portugués': 'Portugués', 'português': 'Portugués', 'english': 'Inglés', 'inglés': 'Inglés' }
   },
   pt: {
@@ -66,15 +68,16 @@ const T = {
     upcDesc: (list) => `Próximas obras da ${site.name}: ${list}.`, seeCatalog: 'Ver o catálogo →', exploreCat: 'Explore o catálogo →',
     aboutTitle: 'A editora', aboutDesc: `Conheça a ${site.name}, editora independente de livros em espanhol e português dirigida por ${site.editor}.`,
     contactTitle: 'Contato', contactDesc: `Escreva para a ${site.name} para consultas sobre livros, imprensa, distribuição ou colaborações.`, writeTo: 'Escreva para',
-    langAria: 'Idioma do site', switchTo: 'Ler em espanhol', openToc: 'Abrir a página esquerda do livro', booksLabel: 'Livros', backToc: 'Índice',
+    langAria: 'Idioma do site', switchTo: 'Ler em espanhol', openToc: 'Abrir a página esquerda do livro', booksLabel: 'Livros', backToc: 'Índice', privacy: 'Política de privacidade',
+    form: { name: 'Nome', email: 'E-mail', message: 'Mensagem', send: 'Enviar mensagem', ok: 'Obrigado. Recebemos a sua mensagem e responderemos em breve.', err: 'Não foi possível enviar. Tente novamente ou escreva diretamente para o e-mail.', or: 'ou escreva diretamente', consent: 'Ao enviar este formulário, você concorda que usemos os seus dados para responder a você, conforme a nossa' },
     languages: { 'español': 'Espanhol', 'portugués': 'Português', 'português': 'Português', 'english': 'Inglês', 'inglés': 'Inglês' }
   }
 };
 
 // Rutas de cada sección, por idioma (el español queda en la raíz)
 const R = {
-  es: { home: '/', catalog: '/catalogo/', upcoming: '/proximas-obras/', about: '/sobre-nosotros/', contact: '/contacto/', books: '/libros/' },
-  pt: { home: '/pt/', catalog: '/pt/catalogo/', upcoming: '/pt/proximas-obras/', about: '/pt/sobre-nos/', contact: '/pt/contato/', books: '/pt/livros/' }
+  es: { home: '/', catalog: '/catalogo/', upcoming: '/proximas-obras/', about: '/sobre-nosotros/', contact: '/contacto/', privacy: '/politica-de-privacidad/', books: '/libros/' },
+  pt: { home: '/pt/', catalog: '/pt/catalogo/', upcoming: '/pt/proximas-obras/', about: '/pt/sobre-nos/', contact: '/pt/contato/', privacy: '/pt/politica-de-privacidade/', books: '/pt/livros/' }
 };
 const slugOf = (lang, b) => (lang !== 'es' && b[`slug_${lang}`]) || b.slug;
 // Las claves de libro usan el slug en español: "book:<slug>"
@@ -211,11 +214,12 @@ function buildLang(lang) {
     ...bk.map((b) => ({ key: `book:${b.slug}`, path: bookPath(b), title: titleOf(b) })),
     ...(up.length ? [{ key: 'upcoming', path: r.upcoming, title: t.upcoming }] : []),
     { key: 'about', path: r.about, title: t.about },
-    { key: 'contact', path: r.contact, title: t.contact }
+    { key: 'contact', path: r.contact, title: t.contact },
+    ...(privacy ? [{ key: 'privacy', path: r.privacy, title: t.privacy }] : [])
   ];
   const folioOf = (p) => pages.findIndex((x) => x.path === p);
   const roman = ['I', 'II', 'III', 'IV', 'V', 'VI'];
-  const chapterKeys = ['home', 'catalog', ...(up.length ? ['upcoming'] : []), 'about', 'contact'];
+  const chapterKeys = ['home', 'catalog', ...(up.length ? ['upcoming'] : []), 'about', 'contact', ...(privacy ? ['privacy'] : [])];
   const chapter = (key) => roman[chapterKeys.indexOf(key)];
 
   const catOf = (b) => loc(lang, b, 'category');
@@ -269,7 +273,8 @@ function buildLang(lang) {
         { path: r.catalog, label: t.catalog },
         ...(up.length ? [{ path: r.upcoming, label: t.upcoming }] : []),
         { path: r.about, label: t.about },
-        { path: r.contact, label: t.contact }
+        { path: r.contact, label: t.contact },
+        ...(privacy ? [{ path: r.privacy, label: t.privacy }] : [])
       ].map((it, i) => ({ ...it, num: roman[i] }));
       const li = main.map((it) => `<li><a href="${it.path}"${current === it.path ? ' aria-current="page"' : ''}><span class="toc-num" aria-hidden="true">${it.num}</span><span class="toc-title">${it.label}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioN(it.path)}</span></a></li>`).join('');
       nav = `<nav aria-label="${t.tocAria}"><p class="toc-label" aria-hidden="true">${t.toc}</p><ol class="toc">${li}</ol></nav>`;
@@ -281,7 +286,7 @@ function buildLang(lang) {
     return `<header class="head"><a class="brand" href="${r.home}"${current === r.home ? ' aria-current="page"' : ''}>${logo}<span class="brand-sub">${t.publisher}</span></a>${langSwitch(key)}</header>
 ${back}${nav}
 <div class="left-extra">${extra}</div>
-<footer class="left-footer"><p>© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}</p><p>${t.leftFoot}</p></footer>`;
+<footer class="left-footer"><p>© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}</p><p>${t.leftFoot}</p>${privacy ? `<p><a class="priv-link" href="${r.privacy}">${t.privacy}</a></p>` : ''}</footer>`;
   }
 
   function rightPage(current, content, key) {
@@ -294,7 +299,7 @@ ${back}${nav}
     }
     const deco = key === 'home' || !key ? `<span class="ribbon" aria-hidden="true"></span>` : `<a class="ribbon" href="${r.home}" aria-label="${t.backToc}" title="${t.backToc}"></a>`;
     const ribbon = deco + `<button type="button" class="ribbon-btn" aria-label="${t.openToc}" aria-expanded="false" aria-controls="page-left"></button>`;
-    return `${ribbon}${key ? langSwitch(key).replace('class="lang"', 'class="lang lang--mini"') : ''}<div class="content">${content}</div>${folio}<p class="mobile-footer">© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}. ${t.mobileFoot}</p>`;
+    return `${ribbon}${key ? langSwitch(key).replace('class="lang"', 'class="lang lang--mini"') : ''}<div class="content">${content}</div>${folio}<p class="mobile-footer">© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}. ${t.mobileFoot}${privacy ? ` <a class="priv-link" href="${r.privacy}">${t.privacy}</a>` : ''}</p>`;
   }
 
   const defaultExtra = `<div style="text-align:center">${ornament}<p class="left-quote">${esc(s.tagline)}</p></div>`;
@@ -437,6 +442,22 @@ ${rule}
     ld: [orgLd]
   }));
 
+  // Formulario de contacto: solo si site.contactEndpoint (Formspree o Web3Forms) está configurado
+  function contactForm() {
+    if (!site.contactEndpoint) return '';
+    const f = t.form;
+    return `<form class="contact-form" data-contact action="${esc(site.contactEndpoint)}" method="post" data-ok="${esc(f.ok)}" data-err="${esc(f.err)}">
+<label class="f">${f.name}<input name="name" required autocomplete="name" maxlength="120"></label>
+<label class="f">${f.email}<input type="email" name="email" required autocomplete="email" maxlength="160"></label>
+<label class="f">${f.message}<textarea name="message" required rows="6" maxlength="5000"></textarea></label>
+<input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+${site.contactAccessKey ? `<input type="hidden" name="access_key" value="${esc(site.contactAccessKey)}">\n<input type="hidden" name="subject" value="${esc(site.name)} — ${esc(f.message)}">` : ''}
+<p class="fineprint">${f.consent} <a href="${r.privacy}">${t.privacy}</a>.</p>
+<button class="btn cta" type="submit"><span class="btn-kicker">${t.contactTitle}</span><span class="btn-label">${f.send}</span></button>
+<p class="form-status" role="status" aria-live="polite"></p>
+</form>`;
+  }
+
   // Contacto
   outPage(r.contact, document_({
     lang, path: r.contact, order: folioOf(r.contact) + 1, page: 'contact', alt: altOf('contact'),
@@ -448,9 +469,35 @@ ${rule}
 <h1>${t.contactTitle}</h1>
 <p class="lead">${esc(s.contactIntro)}</p>
 ${rule}
-<p><a class="btn cta" href="mailto:${esc(site.email)}"><span class="btn-kicker">${t.writeTo}</span><span class="btn-label">${esc(site.email)}</span></a></p>`, 'contact'),
+${contactForm()}
+<p${site.contactEndpoint ? ' class="alt-mail"' : ''}>${site.contactEndpoint ? `${t.form.or}: ` : ''}<a class="btn cta" href="mailto:${esc(site.email)}"><span class="btn-kicker">${t.writeTo}</span><span class="btn-label">${esc(site.email)}</span></a></p>`, 'contact'),
     ld: [{ '@context': 'https://schema.org', '@type': 'ContactPage', name: t.contactTitle, url: abs(r.contact) }]
   }));
+
+  // Política de privacidad
+  if (privacy) {
+    const pv = privacy[lang];
+    const mail = `<a href="mailto:${esc(site.email)}">${esc(site.email)}</a>`;
+    const para = (x) => `<p>${esc(x).replace('{email}', mail)}</p>`;
+    const [y, m, d] = privacy.updated.split('-');
+    const months = lang === 'es' ? ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] : ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+    const when = `${Number(d)} ${lang === 'es' ? 'de' : 'de'} ${months[Number(m) - 1]} ${lang === 'es' ? 'de' : 'de'} ${y}`;
+    outPage(r.privacy, document_({
+      lang, path: r.privacy, order: folioOf(r.privacy) + 1, page: 'privacy', alt: altOf('privacy'),
+      title: `${pv.title} — ${site.name}`,
+      description: pv.intro,
+      left: leftPage(r.privacy, defaultExtra, 'privacy'),
+      right: rightPage(r.privacy, `
+<p class="eyebrow">${t.chapter} ${chapter('privacy')}</p>
+<h1>${pv.title}</h1>
+<p class="lead">${esc(pv.intro)}</p>
+<p class="fineprint">${pv.updatedLabel}: ${when}</p>
+<div class="prose legal" lang="${lang}">
+${pv.sections.map((sec) => `<h2>${esc(sec.h)}</h2>\n${sec.p.map(para).join('\n')}`).join('\n')}
+</div>`, 'privacy'),
+      ld: [{ '@context': 'https://schema.org', '@type': 'WebPage', name: pv.title, url: abs(r.privacy), inLanguage: lang }]
+    }));
+  }
 
   return pages;
 }

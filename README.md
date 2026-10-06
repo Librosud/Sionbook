@@ -62,3 +62,7 @@ Opcional (recomendado): en Vercel → Firewall → *Rate Limiting*, limita `/api
 Si cambias de contraseña: vuelve a ejecutar el paso 1, actualiza `ADMIN_PASSWORD_HASH` (y `SESSION_SECRET`, que cierra todas las sesiones abiertas) y haz *Redeploy*. Si el token caduca o lo revocas, crea otro y actualiza `GITHUB_TOKEN`.
 
 El panel local (`abrir-panel.bat`, http://localhost:4000) sigue existiendo para trabajar con vista previa antes de publicar. Pruebas automáticas: `npm test`.
+
+## Formulario de contacto y política de privacidad
+- **Formulario:** se activa al pegar el enlace en el panel (Textos de la editorial → Formulario de contacto) o en `site.json` → `contactEndpoint`. Formspree: `https://formspree.io/f/xxxxxxxx`. Web3Forms: `https://api.web3forms.com/submit` + tu clave pública en `contactAccessKey`. Vacío = solo el botón de correo.
+- **Política de privacidad:** texto en `data/privacy.json` (es/pt), página propia al final del libro y enlazada en el pie. Es una plantilla general: revísala (sobre todo el plazo de conservación, 24 meses) y, si hace falta, consúltala con un profesional. Si cambias de servicio de formularios, actualiza la sección "Servicios externos".

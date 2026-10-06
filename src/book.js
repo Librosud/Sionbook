@@ -17,6 +17,21 @@
     });
   });
 
+  /* ---- Formulario de contacto (envío sin recargar; sin JS se envía como formulario normal) ---- */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (!f || !f.matches || !f.matches('form[data-contact]')) return;
+    e.preventDefault();
+    var status = f.querySelector('.form-status'), btn = f.querySelector('button[type="submit"]');
+    status.className = 'form-status'; status.textContent = '…';
+    btn.disabled = true;
+    fetch(f.action, { method: 'POST', body: new FormData(f), headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.success === false || j.ok === false) throw new Error('fail'); }); })
+      .then(function () { status.className = 'form-status is-ok'; status.textContent = f.getAttribute('data-ok'); f.reset(); })
+      .catch(function () { status.className = 'form-status is-err'; status.textContent = f.getAttribute('data-err'); })
+      .then(function () { btn.disabled = false; });
+  });
+
   /* ---- Pasar página ---- */
   var spread = document.getElementById('spread');
   if (!spread || !window.fetch || !window.DOMParser || !('animate' in Element.prototype)) return;
