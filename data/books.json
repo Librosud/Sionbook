@@ -1,0 +1,53 @@
+[
+  {
+    "slug": "titulo-de-ejemplo-i",
+    "title": "Título de ejemplo I",
+    "subtitle": "Subtítulo del libro",
+    "author": "Autor de ejemplo",
+    "year": 2026,
+    "pages": 320,
+    "isbn": "",
+    "language": "Español",
+    "category": "Estudio doctrinal",
+    "color": "#6b1d2a",
+    "cover": "",
+    "description": "Aquí va la sinopsis del libro. Escríbela en un par de párrafos: de qué trata, a quién va dirigido y qué aportará al lector. Este texto lo leerá Google, así que cuanto más claro y propio, mejor.",
+    "amazonPrint": "",
+    "amazonKindle": "",
+    "googlePlay": ""
+  },
+  {
+    "slug": "titulo-de-ejemplo-ii",
+    "title": "Título de ejemplo II",
+    "subtitle": "",
+    "author": "Autor de ejemplo",
+    "year": 2026,
+    "pages": 248,
+    "isbn": "",
+    "language": "Español",
+    "category": "Historia",
+    "color": "#1f3a5f",
+    "cover": "",
+    "description": "Sinopsis del segundo libro de ejemplo. Sustitúyela por la real.",
+    "amazonPrint": "",
+    "amazonKindle": "",
+    "googlePlay": ""
+  },
+  {
+    "slug": "titulo-de-ejemplo-iii",
+    "title": "Título de ejemplo III",
+    "subtitle": "",
+    "author": "Autor de ejemplo",
+    "year": 2025,
+    "pages": 180,
+    "isbn": "",
+    "language": "Português",
+    "category": "Devocional",
+    "color": "#3f5b3a",
+    "cover": "",
+    "description": "Sinopse do terceiro livro de exemplo. Substitua pela real.",
+    "amazonPrint": "",
+    "amazonKindle": "",
+    "googlePlay": ""
+  }
+]

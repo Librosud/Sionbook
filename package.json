@@ -1,0 +1,12 @@
+{
+  "name": "sionbook",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sitio web de Sion Book — editorial",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node build.mjs && node serve.mjs"
+  },
+  "engines": { "node": ">=18" }
+}

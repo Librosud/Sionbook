@@ -1,0 +1,17 @@
+{
+  "name": "Sion Book",
+  "url": "https://sionbook.com",
+  "lang": "es",
+  "locale": "es_ES",
+  "tagline": "Libros para leer, estudiar y atesorar",
+  "description": "Sion Book es una editorial independiente de libros en español y portugués. Cómpralos en papel, en Kindle o en Google Play Libros.",
+  "editor": "Lucas Calveiro",
+  "editorTitle": "Editor General",
+  "email": "contacto@sionbook.com",
+  "about": [
+    "Sion Book es una editorial independiente que publica libros en español y portugués. Creemos que un libro bien hecho se nota desde la primera página: en la corrección del texto, en la composición, en la comodidad de la lectura.",
+    "Cada título pasa por un cuidadoso trabajo de edición, corrección y diseño interior, y se prepara tanto para el papel como para la pantalla. Por eso puedes encontrar nuestros libros en edición impresa y Kindle en Amazon, y en formato digital en Google Play Libros.",
+    "La editorial está dirigida por Lucas Calveiro, Editor General, editor y compositor de libros de oficio."
+  ],
+  "contactIntro": "Para consultas sobre nuestros libros, prensa, distribución o colaboraciones, escríbenos y te responderemos lo antes posible."
+}
