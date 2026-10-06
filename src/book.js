@@ -178,6 +178,35 @@
     var h0 = spread.offsetHeight;
     var oldRightHTML = inner(right()).innerHTML;
     var oldLeftHTML = inner(left()).innerHTML;
+
+    // Móvil: solo se ve una hoja, así que la hoja que se pasa cruza la pantalla de derecha a izquierda
+    // (se levanta por el borde libre y se desliza fuera por la izquierda; hacia atrás, vuelve de izquierda a derecha)
+    if (phone.matches) {
+      var fwd = dir > 0;
+      fill(right(), newRight);
+      var Hs = Math.max(h0, spread.offsetHeight);
+      if (!fwd) inner(right()).innerHTML = oldRightHTML; // la hoja actual sigue debajo hasta que la otra la cubre
+      spread.style.minHeight = Hs + 'px';
+      var sweepLeaf = makeLeaf(fwd ? oldRightHTML : newRight.innerHTML, '', Hs);
+      spread.appendChild(sweepLeaf);
+      var so = { duration: 760, easing: 'cubic-bezier(.45,.05,.25,1)', fill: 'forwards', direction: fwd ? 'normal' : 'reverse' };
+      var sweep = [
+        sweepLeaf.animate([
+          { transform: 'translateZ(1px) translateX(0) rotateY(0deg)', offset: 0 },
+          { transform: 'translateZ(1px) translateX(-30%) rotateY(-32deg)', offset: 0.42 },
+          { transform: 'translateZ(1px) translateX(-114%) rotateY(-16deg)', offset: 1 }
+        ], so),
+        sweepLeaf.querySelector('.face--front .shade').animate([{ opacity: 0 }, { opacity: 0.45 }], so)
+      ];
+      try { await Promise.all(sweep.map(function (x) { return x.finished; })); } catch (err) { /* cancelada */ }
+      if (!fwd) fill(right(), newRight);
+      fill(left(), newLeft);
+      sweepLeaf.remove();
+      spread.style.minHeight = '';
+      finish(url, doc, push);
+      return;
+    }
+
     var leaf, front, back, turn, finalStep;
 
     if (dir > 0 || !twoPages) {
