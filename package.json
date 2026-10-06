@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Sitio web de Sion Book — editorial",
+  "description": "Sitio web de Sion Book \u2014 editorial",
   "scripts": {
     "build": "node build.mjs",
-    "start": "node build.mjs && node serve.mjs"
+    "start": "node build.mjs && node serve.mjs",
+    "admin": "node admin.mjs"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

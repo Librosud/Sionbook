@@ -18,4 +18,5 @@ http.createServer((req, res) => {
   }
   res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
   fs.createReadStream(path.join(dist, '404.html')).pipe(res);
-}).listen(3000, () => console.log('Vista previa en http://localhost:3000'));
+}).on('error', (e) => { if (e.code === 'EADDRINUSE') console.log('La vista previa ya estaba abierta en http://localhost:3000'); else throw e; })
+  .listen(3000, () => console.log('Vista previa en http://localhost:3000'));

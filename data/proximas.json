@@ -8,7 +8,11 @@
     "cover": "",
     "color": "#0a2a8a",
     "subtitle_pt": "Tomo I — Profetas da Restauração",
-    "note_pt": "As últimas palavras públicas dos Presidentes da Igreja"
+    "note_pt": "As últimas palavras públicas dos Presidentes da Igreja",
+    "languages": [
+      "es",
+      "pt"
+    ]
   },
   {
     "title": "Comentario doctrinal del Nuevo Testamento",
@@ -19,6 +23,10 @@
     "cover": "",
     "color": "#0a2a8a",
     "subtitle_pt": "Tomo III: Atos",
-    "title_pt": "Comentário doutrinário do Novo Testamento"
+    "title_pt": "Comentário doutrinário do Novo Testamento",
+    "languages": [
+      "es",
+      "pt"
+    ]
   }
 ]

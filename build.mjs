@@ -16,6 +16,9 @@ const upcoming = fs.existsSync(path.join(root, 'data/proximas.json')) ? JSON.par
 const today = new Date();
 const year = today.getFullYear();
 const LANGS = ['es', 'pt'];
+// Un libro (o próxima obra) aparece en los idiomas de su campo `languages`; sin el campo, en todos
+const inLang = (item, lang) => !item.languages || item.languages.includes(lang);
+const existsIn = (lang, key) => (key.startsWith('book:') ? inLang(books.find((b) => b.slug === key.slice(5)), lang) : key === 'upcoming' ? upcoming.some((u) => inLang(u, lang)) : true);
 
 /* ---------- textos de la interfaz ---------- */
 
@@ -146,8 +149,9 @@ function document_({ lang, path: p, order, page, title, description, left, right
   const canonical = abs(p === '/404.html' ? '/' : p);
   const image = og.image ? abs(og.image) : '';
   const other = LANGS.find((l) => l !== lang);
-  const alternates = alt
-    ? LANGS.map((l) => `<link rel="alternate" hreflang="${l}" href="${abs(alt[l])}">`).join('\n') + `\n<link rel="alternate" hreflang="x-default" href="${abs(alt.es)}">\n`
+  const altLangs = alt ? LANGS.filter((l) => alt[l]) : [];
+  const alternates = altLangs.length > 1
+    ? altLangs.map((l) => `<link rel="alternate" hreflang="${l}" href="${abs(alt[l])}">`).join('\n') + `\n<link rel="alternate" hreflang="x-default" href="${abs(alt.es || alt[altLangs[0]])}">\n`
     : '';
   return `<!doctype html>
 <html lang="${lang}">
@@ -160,7 +164,7 @@ function document_({ lang, path: p, order, page, title, description, left, right
 ${alternates}<meta name="theme-color" content="#0a1f6b">
 <meta property="og:site_name" content="${esc(site.name)}">
 <meta property="og:locale" content="${T[lang].locale}">
-${alt ? `<meta property="og:locale:alternate" content="${T[other].locale}">\n` : ''}<meta property="og:type" content="${og.type || 'website'}">
+${altLangs.length > 1 ? `<meta property="og:locale:alternate" content="${T[other].locale}">\n` : ''}<meta property="og:type" content="${og.type || 'website'}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${canonical}">
@@ -194,22 +198,24 @@ function buildLang(lang) {
   const s = site[lang];
   const r = R[lang];
   const other = LANGS.find((l) => l !== lang);
+  const bk = books.filter((b) => inLang(b, lang));
+  const up = upcoming.filter((u) => inLang(u, lang));
   const bookPath = (b) => `${r.books}${slugOf(lang, b)}/`;
   const titleOf = (b) => loc(lang, b, 'title');
-  const altOf = (key) => ({ es: routeOf('es', key), pt: routeOf('pt', key) });
+  const altOf = (key) => Object.fromEntries(LANGS.filter((l) => existsIn(l, key)).map((l) => [l, routeOf(l, key)]));
 
   // Páginas en orden de lectura
   const pages = [
     { key: 'home', path: r.home, title: t.home },
     { key: 'catalog', path: r.catalog, title: t.catalog },
-    ...books.map((b) => ({ key: `book:${b.slug}`, path: bookPath(b), title: titleOf(b) })),
-    ...(upcoming.length ? [{ key: 'upcoming', path: r.upcoming, title: t.upcoming }] : []),
+    ...bk.map((b) => ({ key: `book:${b.slug}`, path: bookPath(b), title: titleOf(b) })),
+    ...(up.length ? [{ key: 'upcoming', path: r.upcoming, title: t.upcoming }] : []),
     { key: 'about', path: r.about, title: t.about },
     { key: 'contact', path: r.contact, title: t.contact }
   ];
   const folioOf = (p) => pages.findIndex((x) => x.path === p);
   const roman = ['I', 'II', 'III', 'IV', 'V', 'VI'];
-  const chapterKeys = ['home', 'catalog', ...(upcoming.length ? ['upcoming'] : []), 'about', 'contact'];
+  const chapterKeys = ['home', 'catalog', ...(up.length ? ['upcoming'] : []), 'about', 'contact'];
   const chapter = (key) => roman[chapterKeys.indexOf(key)];
 
   const catOf = (b) => loc(lang, b, 'category');
@@ -219,9 +225,10 @@ function buildLang(lang) {
     const title = titleOf(b);
     const sub = loc(lang, b, 'subtitle');
     const c = `class="cover${cls ? ' ' + cls : ''}" style="--c:${colorOf(b)}"`;
-    if (b.cover) {
+    const img = loc(lang, b, 'cover');
+    if (img) {
       const altText = decorative ? '' : `${t.coverOf} ${esc(title)}`;
-      return `<span ${c}${decorative ? ' aria-hidden="true"' : ''}><img src="${esc(b.cover)}" alt="${altText}" width="400" height="600" loading="lazy" decoding="async"></span>`;
+      return `<span ${c}${decorative ? ' aria-hidden="true"' : ''}><img src="${esc(img)}" alt="${altText}" width="400" height="600" loading="lazy" decoding="async"></span>`;
     }
     const a11y = decorative ? 'aria-hidden="true"' : `role="img" aria-label="${t.coverOf} ${esc(title)}"`;
     return `<span ${c} ${a11y}><span class="cover-frame"><span><span class="cover-title">${esc(title)}</span>${sub ? `<span class="cover-sub" style="display:block">${esc(sub)}</span>` : ''}</span>${coverMark}<span class="cover-author">${esc(b.author)}</span></span></span>`;
@@ -243,7 +250,7 @@ function buildLang(lang) {
     if (!key) return '';
     const item = (l) => (l === lang
       ? `<span class="lang-on" lang="${l}" aria-current="true">${l.toUpperCase()}</span>`
-      : `<a href="${routeOf(l, key)}" lang="${l}" hreflang="${l}" data-no-flip aria-label="${t.switchTo}" title="${t.switchTo}">${l.toUpperCase()}</a>`);
+      : `<a href="${existsIn(l, key) ? routeOf(l, key) : R[l].home}" lang="${l}" hreflang="${l}" data-no-flip aria-label="${t.switchTo}" title="${t.switchTo}">${l.toUpperCase()}</a>`);
     return `<div class="lang" role="group" aria-label="${t.langAria}">${LANGS.map(item).join('')}</div>`;
   }
 
@@ -251,14 +258,14 @@ function buildLang(lang) {
     const main = [
       { path: r.home, label: t.home },
       { path: r.catalog, label: t.catalog, kids: true },
-      ...(upcoming.length ? [{ path: r.upcoming, label: t.upcoming }] : []),
+      ...(up.length ? [{ path: r.upcoming, label: t.upcoming }] : []),
       { path: r.about, label: t.about },
       { path: r.contact, label: t.contact }
     ].map((it, i) => ({ ...it, num: roman[i] }));
     const li = main.map((it) => {
       const aria = current === it.path ? ' aria-current="page"' : it.kids && current.startsWith(r.books) ? ' aria-current="true"' : '';
-      const kids = it.kids && books.length
-        ? `<ol class="toc toc--sub">${books.slice(0, 8).map((b) => `<li><a href="${bookPath(b)}"${current === bookPath(b) ? ' aria-current="page"' : ''}><span class="toc-title">${esc(titleOf(b))}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(bookPath(b)) + 1}</span></a></li>`).join('')}</ol>`
+      const kids = it.kids && bk.length
+        ? `<ol class="toc toc--sub">${bk.slice(0, 8).map((b) => `<li><a href="${bookPath(b)}"${current === bookPath(b) ? ' aria-current="page"' : ''}><span class="toc-title">${esc(titleOf(b))}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(bookPath(b)) + 1}</span></a></li>`).join('')}</ol>`
         : '';
       return `<li><a href="${it.path}"${aria}><span class="toc-num" aria-hidden="true">${it.num}</span><span class="toc-title">${it.label}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(it.path) + 1}</span></a>${kids}</li>`;
     }).join('');
@@ -295,7 +302,7 @@ function buildLang(lang) {
 <p class="lead">${esc(s.description)}</p>
 ${rule}
 <h2>${t.news}</h2>
-<ul class="grid">${books.slice(0, 3).map((b) => card(b)).join('')}</ul>
+<ul class="grid">${bk.slice(0, 3).map((b) => card(b)).join('')}</ul>
 <p><a class="link-arrow" href="${r.catalog}">${t.seeAll}</a></p>
 ${rule}
 <h2>${t.howBuy}</h2>
@@ -309,18 +316,18 @@ ${rule}
   }));
 
   // Catálogo
-  const categories = [...new Set(books.map(catOf).filter(Boolean))];
+  const categories = [...new Set(bk.map(catOf).filter(Boolean))];
   outPage(r.catalog, document_({
     lang, path: r.catalog, order: 2, page: 'catalog', alt: altOf('catalog'),
     title: `${t.catTitle} — ${site.name}`,
-    description: t.catDesc(books.length),
+    description: t.catDesc(bk.length),
     left: leftPage(r.catalog, defaultExtra, 'catalog'),
     right: rightPage(r.catalog, `
 <p class="eyebrow">${t.chapter} ${chapter('catalog')}</p>
 <h1>${t.catalog}</h1>
 <p class="lead">${t.catLead}</p>
 ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="group" aria-label="${t.filterAria}"><button type="button" class="chip" data-filter="all" aria-pressed="true">${t.all}</button>${categories.map((c) => `<button type="button" class="chip" data-filter="${esc(c)}" aria-pressed="false">${esc(c)}</button>`).join('')}</div>` : ''}
-<ul class="grid">${books.map((b) => card(b, true)).join('')}</ul>`),
+<ul class="grid">${bk.map((b) => card(b, true)).join('')}</ul>`),
     ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: t.catalog, url: abs(r.catalog), isPartOf: { '@type': 'WebSite', name: site.name, url: site.url } }]
   }));
 
@@ -331,7 +338,7 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
     { key: 'googlePlay', label: t.playName, format: 'https://schema.org/EBook' }
   ];
 
-  for (const b of books) {
+  for (const b of bk) {
     const p = bookPath(b);
     const key = `book:${b.slug}`;
     const bt = titleOf(b);
@@ -354,7 +361,7 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
       lang, path: p, order: folioOf(p) + 1, page: 'book', alt: altOf(key),
       title: `${bt}${sub ? ': ' + sub : ''} — ${b.author} | ${site.name}`,
       description: metaDesc,
-      og: { type: 'book', image: b.cover },
+      og: { type: 'book', image: loc(lang, b, 'cover') },
       left: leftPage(p, cover(b, { cls: 'only-wide', decorative: true }), key),
       right: rightPage(p, `
 <nav class="breadcrumb" aria-label="${t.crumbAria}"><a href="${r.catalog}">${t.catalog}</a> / <span>${esc(bt)}</span></nav>
@@ -375,7 +382,7 @@ ${rule}
           author: { '@type': 'Person', name: b.author }, inLanguage: langCode(b.language), url: abs(p), description: desc || undefined,
           publisher: { '@type': 'Organization', name: site.name, url: site.url }, isbn: b.isbn || undefined,
           numberOfPages: b.pages || undefined, datePublished: b.year ? String(b.year) : undefined, genre: catOf(b) || undefined,
-          image: b.cover ? abs(b.cover) : undefined, workExample: work.length ? work : undefined
+          image: loc(lang, b, 'cover') ? abs(loc(lang, b, 'cover')) : undefined, workExample: work.length ? work : undefined
         },
         {
           '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -390,16 +397,16 @@ ${rule}
   }
 
   // Próximas obras
-  if (upcoming.length) outPage(r.upcoming, document_({
+  if (up.length) outPage(r.upcoming, document_({
     lang, path: r.upcoming, order: folioOf(r.upcoming) + 1, page: 'upcoming', alt: altOf('upcoming'),
     title: `${t.upcoming} — ${site.name}`,
-    description: t.upcDesc(upcoming.map((u) => { const sub = loc(lang, u, 'subtitle'); return titleOf(u) + (sub ? ' (' + sub + ')' : ''); }).join('; ')),
+    description: t.upcDesc(up.map((u) => { const sub = loc(lang, u, 'subtitle'); return titleOf(u) + (sub ? ' (' + sub + ')' : ''); }).join('; ')),
     left: leftPage(r.upcoming, defaultExtra, 'upcoming'),
     right: rightPage(r.upcoming, `
 <p class="eyebrow">${t.chapter} ${chapter('upcoming')}</p>
 <h1>${t.upcoming}</h1>
 <p class="lead">${t.upcLead}</p>
-<ul class="grid">${upcoming.map(soonCard).join('')}</ul>
+<ul class="grid">${up.map(soonCard).join('')}</ul>
 <p><a class="link-arrow" href="${r.catalog}">${t.seeCatalog}</a></p>`)
   }));
 
@@ -470,12 +477,12 @@ out('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${site.url}/sitemap.xml\n
 
 // Sitemap con alternativas de idioma (hreflang)
 const lastmod = today.toISOString().slice(0, 10);
-const keys = built.es.map((p) => p.key);
 const sitemapUrl = (lang, key) => {
-  const alts = LANGS.map((l) => `<xhtml:link rel="alternate" hreflang="${l}" href="${site.url}${routeOf(l, key)}"/>`).join('') + `<xhtml:link rel="alternate" hreflang="x-default" href="${site.url}${routeOf('es', key)}"/>`;
+  const here = LANGS.filter((l) => existsIn(l, key));
+  const alts = here.length > 1 ? here.map((l) => `<xhtml:link rel="alternate" hreflang="${l}" href="${site.url}${routeOf(l, key)}"/>`).join('') + `<xhtml:link rel="alternate" hreflang="x-default" href="${site.url}${routeOf(here.includes('es') ? 'es' : here[0], key)}"/>` : '';
   return `  <url><loc>${site.url}${routeOf(lang, key)}</loc><lastmod>${lastmod}</lastmod>${alts}</url>`;
 };
-out('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${LANGS.flatMap((l) => keys.map((k) => sitemapUrl(l, k))).join('\n')}\n</urlset>\n`);
+out('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${LANGS.flatMap((l) => built[l].map((p) => sitemapUrl(l, p.key))).join('\n')}\n</urlset>\n`);
 
 out('_headers', `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n`);
 
@@ -491,4 +498,4 @@ if (fs.existsSync(coversDir)) {
   }
 }
 
-console.log(`✔ Sitio generado en dist/ — ${built.es.length} páginas × ${LANGS.length} idiomas (${books.length} libros).`);
+console.log(`✔ Sitio generado en dist/ — ${LANGS.map((l) => `${l.toUpperCase()}: ${built[l].length} páginas`).join(' · ')} (${books.length} libros).`);

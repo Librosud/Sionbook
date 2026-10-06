@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel — Sion Book</title>
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --blue: #0a3df0; --blue-2: #001fb5; --navy: #0a1f6b; --cyan: #00a3e0; --ink: #1f2433; --muted: #5d6680;
+    --line: #d5dcee; --bg: #eef2fb; --card: #fff; --ok: #0a7a3d; --warn: #b45309; --bad: #b42318;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); }
+  header.top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 16px; padding: 10px 24px; background: #fff; border-bottom: 1px solid var(--line); box-shadow: 0 6px 18px -14px #0a1f6b; }
+  header.top img { height: 40px; }
+  header.top h1 { font-size: 17px; margin: 0; font-weight: 650; color: var(--navy); }
+  .spacer { flex: 1; }
+  .state { font-size: 13px; color: var(--muted); padding: 4px 10px; border-radius: 999px; background: var(--bg); }
+  .state.dirty { background: #fff4e0; color: var(--warn); font-weight: 600; }
+  button, .btn { font: inherit; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink); padding: 8px 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  button:hover, .btn:hover { border-color: var(--blue); color: var(--blue); }
+  button.primary { background: linear-gradient(180deg, var(--blue), var(--blue-2)); border-color: var(--blue-2); color: #fff; font-weight: 600; }
+  button.primary:hover { color: #fff; filter: brightness(1.08); }
+  button.danger { color: var(--bad); }
+  button.danger:hover { border-color: var(--bad); color: var(--bad); }
+  button:disabled { opacity: .5; cursor: default; }
+  button.small { padding: 4px 9px; font-size: 13px; }
+  nav.tabs { display: flex; gap: 4px; padding: 0 24px; background: #fff; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  nav.tabs button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; padding: 12px 16px; background: none; font-weight: 600; color: var(--muted); }
+  nav.tabs button[aria-selected="true"] { color: var(--blue); border-bottom-color: var(--blue); }
+  main { max-width: 1280px; margin: 0 auto; padding: 24px; }
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; color: var(--navy); }
+  .card h3 { margin: 22px 0 10px; font-size: 14px; color: var(--navy); text-transform: uppercase; letter-spacing: .06em; padding-top: 14px; border-top: 1px solid var(--line); }
+  .card h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+  .list { display: grid; gap: 8px; }
+  .item { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; }
+  .item[aria-current="true"] { border-color: var(--blue); box-shadow: 0 0 0 2px #0a3df022; }
+  .thumb { width: 44px; height: 66px; border-radius: 3px; background: var(--navy) center/cover no-repeat; box-shadow: 0 2px 6px #0004; }
+  .item b { display: block; line-height: 1.25; font-size: 14px; }
+  .item small { color: var(--muted); }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: #e3e9fb; color: var(--blue-2); margin-right: 3px; }
+  .badge.off { background: #f1f1f1; color: #aaa; text-decoration: line-through; }
+  .mv { display: grid; gap: 2px; }
+  .mv button { padding: 0 7px; line-height: 1.2; font-size: 11px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 18px; }
+  @media (max-width: 700px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  label.f { display: block; font-size: 13px; font-weight: 600; color: var(--ink); }
+  label.f span.hint { font-weight: 400; color: var(--muted); }
+  label.f input, label.f textarea, label.f select { display: block; width: 100%; margin-top: 4px; font: inherit; font-weight: 400; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); }
+  label.f input:focus, label.f textarea:focus, label.f select:focus { outline: 2px solid #0a3df044; border-color: var(--blue); }
+  label.f textarea { min-height: 150px; resize: vertical; line-height: 1.5; }
+  label.f input[type=color] { padding: 2px; height: 38px; }
+  .lang-tag { display: inline-block; font-size: 11px; font-weight: 700; color: #fff; background: var(--cyan); padding: 0 6px; border-radius: 4px; margin-right: 4px; vertical-align: 1px; }
+  .lang-tag.pt { background: #0a7a3d; }
+  .where { display: flex; gap: 12px; flex-wrap: wrap; }
+  .where label { display: flex; gap: 8px; align-items: center; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; font-weight: 600; background: #fff; }
+  .where label:has(input:checked) { border-color: var(--blue); background: #eef2ff; }
+  .where input { width: 18px; height: 18px; }
+  .covers { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .cover-box { display: flex; gap: 14px; align-items: flex-start; }
+  .cover-box .thumb { width: 96px; height: 144px; flex: none; }
+  .cover-info { font-size: 13px; color: var(--muted); }
+  .cover-info .ok { color: var(--ok); } .cover-info .warn { color: var(--warn); }
+  .note { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+  pre.log { background: #0e1630; color: #d8e1ff; padding: 14px; border-radius: 10px; overflow: auto; max-height: 280px; font-size: 12.5px; white-space: pre-wrap; margin: 12px 0 0; }
+  .toast { position: fixed; right: 20px; bottom: 20px; max-width: 420px; padding: 12px 16px; border-radius: 10px; background: var(--navy); color: #fff; box-shadow: 0 12px 30px -8px #0008; z-index: 50; }
+  .toast.bad { background: var(--bad); } .toast.good { background: var(--ok); }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .stat { display: flex; gap: 22px; flex-wrap: wrap; margin: 4px 0 14px; }
+  .stat div b { display: block; font-size: 24px; color: var(--navy); }
+  .adv summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top">
+  <img src="/logo.png" alt="Sion Book">
+  <h1>Panel de administración</h1>
+  <span class="spacer"></span>
+  <span class="state" id="state">Todo guardado</span>
+  <a class="btn" href="http://localhost:3000" target="_blank" rel="noopener">Ver el sitio ↗</a>
+  <button class="primary" id="save">Guardar y actualizar</button>
+</header>
+<nav class="tabs" role="tablist" id="tabs">
+  <button role="tab" data-tab="books">Libros publicados</button>
+  <button role="tab" data-tab="upcoming">Próximas obras</button>
+  <button role="tab" data-tab="site">Textos de la editorial</button>
+  <button role="tab" data-tab="publish">Publicar en sionbook.com</button>
+</nav>
+<main id="view"></main>
+<div id="toasts"></div>
+
+<script>
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const view = $('#view');
+let data = null;           // { books, upcoming, site }
+let tab = 'books';
+let sel = { books: 0, upcoming: 0 };
+let dirty = false;
+let git = null;
+let lastLog = '';
+
+/* ---------- utilidades ---------- */
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else if (v !== false && v != null) el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  return el;
+}
+const slugify = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70);
+function toast(msg, kind = '') {
+  const t = h('div', { class: 'toast ' + kind }, msg);
+  $('#toasts').append(t); setTimeout(() => t.remove(), kind === 'bad' ? 9000 : 4000);
+}
+async function api(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: { 'x-admin': '1', ...(opts.headers || {}) } });
+  const j = await r.json().catch(() => ({ ok: false, error: 'Respuesta no válida' }));
+  if (!r.ok && !j.log) throw new Error(j.error || 'Error ' + r.status);
+  return j;
+}
+function markDirty() { dirty = true; const s = $('#state'); s.textContent = 'Cambios sin guardar'; s.className = 'state dirty'; }
+function markClean() { dirty = false; const s = $('#state'); s.textContent = 'Todo guardado'; s.className = 'state'; }
+window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+const BOTH = ['es', 'pt'];
+const langsOf = (o) => (Array.isArray(o.languages) ? o.languages : BOTH);
+
+/* ---------- campos ---------- */
+function field(label, obj, key, { lang, type = 'text', hint, area, onchange, placeholder, options } = {}) {
+  const tag = h('span', {}, lang ? h('span', { class: 'lang-tag ' + lang }, lang.toUpperCase()) : null, label, hint ? h('span', { class: 'hint' }, ' · ' + hint) : null);
+  let input;
+  if (options) {
+    input = h('select', {}, options.map((o) => h('option', { value: o, selected: obj[key] === o }, o)));
+  } else if (area) input = h('textarea', { placeholder: placeholder || '' }); else input = h('input', { type, placeholder: placeholder || '' });
+  if (!options) input.value = obj[key] ?? (type === 'color' ? '#0a2a8a' : '');
+  input.addEventListener('input', () => {
+    obj[key] = type === 'number' ? input.value : input.value;
+    markDirty(); if (onchange) onchange(input.value);
+  });
+  return h('label', { class: 'f' }, tag, input);
+}
+
+function whereBox(obj) {
+  if (!Array.isArray(obj.languages)) obj.languages = [...BOTH];
+  const box = (code, name) => {
+    const cb = h('input', { type: 'checkbox' });
+    cb.checked = obj.languages.includes(code);
+    cb.addEventListener('change', () => {
+      obj.languages = BOTH.filter((l) => (l === code ? cb.checked : obj.languages.includes(l)));
+      markDirty(); renderList();
+    });
+    return h('label', {}, cb, h('span', { class: 'lang-tag ' + code }, code.toUpperCase()), name);
+  };
+  return h('div', {}, h('div', { class: 'where' }, box('es', 'Sitio en español'), box('pt', 'Sitio en português')),
+    h('p', { class: 'note' }, 'Elige en qué versión del sitio aparece. Si marcas solo una, en la otra no se muestra ni en el índice ni en el catálogo.'));
+}
+
+/* ---------- portadas ---------- */
+function coverBox(obj, key, title, slugBase) {
+  const thumb = h('div', { class: 'thumb' });
+  const info = h('div', { class: 'cover-info' });
+  const paint = () => {
+    thumb.style.backgroundImage = obj[key] ? `url("${obj[key]}")` : '';
+    thumb.style.background = obj[key] ? '' : '#dfe6fb';
+    if (obj[key]) thumb.style.backgroundImage = `url("${obj[key]}?v=${Date.now() % 100000}")`;
+    thumb.style.backgroundSize = 'cover';
+    info.innerHTML = obj[key] ? `<div>${obj[key]}</div>` : '<div>Sin portada: el sitio genera una con el título y el color.</div>';
+    if (obj[key]) {
+      const im = new Image();
+      im.onload = () => {
+        const ratio = im.naturalWidth / im.naturalHeight;
+        const good = Math.abs(ratio - 2 / 3) < 0.03;
+        info.insertAdjacentHTML('beforeend', `<div class="${good ? 'ok' : 'warn'}">${im.naturalWidth}×${im.naturalHeight}px ${good ? '✓ proporción 2:3' : '⚠ no es 2:3; se recortará para encajar'}</div>`);
+      };
+      im.src = obj[key];
+    }
+  };
+  const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', style: 'display:none' });
+  file.addEventListener('change', async () => {
+    const f = file.files[0]; if (!f) return;
+    try {
+      const base = slugBase() || 'portada';
+      const r = await api('/api/upload?name=' + encodeURIComponent(base), { method: 'POST', headers: { 'content-type': 'application/octet-stream' }, body: f });
+      if (!r.ok) throw new Error(r.error);
+      obj[key] = r.path; markDirty(); paint(); toast(`Portada subida (${r.kb} KB)`, 'good');
+    } catch (e) { toast(e.message, 'bad'); }
+    file.value = '';
+  });
+  paint();
+  return h('div', {}, h('label', { class: 'f' }, title),
+    h('div', { class: 'cover-box', style: 'margin-top:6px' }, thumb,
+      h('div', {}, h('div', { class: 'row' },
+        h('button', { type: 'button', onclick: () => file.click() }, obj[key] ? 'Cambiar imagen' : 'Subir imagen'),
+        obj[key] ? h('button', { type: 'button', class: 'danger', onclick: () => { obj[key] = ''; markDirty(); paint(); } }, 'Quitar') : null, file),
+        info)));
+}
+
+/* ---------- lista lateral ---------- */
+function renderList() {
+  const box = $('#listbox'); if (!box) return;
+  const arr = data[tab]; const list = h('div', { class: 'list' });
+  arr.forEach((o, i) => {
+    const th = h('div', { class: 'thumb' }); if (o.cover) th.style.backgroundImage = `url("${o.cover}")`; else th.style.background = o.color || '#0a2a8a';
+    th.style.backgroundSize = 'cover';
+    const ls = langsOf(o);
+    list.append(h('div', { class: 'item', 'aria-current': String(i === sel[tab]), onclick: () => { sel[tab] = i; render(); } },
+      th,
+      h('div', {}, h('b', {}, o.title || '(sin título)'), h('small', {}, o.author || ''), h('div', {}, BOTH.map((l) => h('span', { class: 'badge' + (ls.includes(l) ? '' : ' off') }, l.toUpperCase())))),
+      h('div', { class: 'mv' },
+        h('button', { class: 'small', title: 'Subir', disabled: i === 0, onclick: (e) => { e.stopPropagation(); move(i, -1); } }, '▲'),
+        h('button', { class: 'small', title: 'Bajar', disabled: i === arr.length - 1, onclick: (e) => { e.stopPropagation(); move(i, 1); } }, '▼'))));
+  });
+  if (!arr.length) list.append(h('div', { class: 'empty' }, 'Todavía no hay nada aquí.'));
+  box.replaceChildren(list);
+}
+function move(i, d) {
+  const arr = data[tab]; const j = i + d; if (j < 0 || j >= arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]]; sel[tab] = j; markDirty(); render();
+}
+
+/* ---------- editor de libro / próxima obra ---------- */
+function editor(kind) {
+  const arr = data[kind]; const o = arr[sel[kind]];
+  if (!o) return h('div', { class: 'card empty' }, kind === 'books' ? 'Añade tu primer libro con el botón de la izquierda.' : 'Añade una próxima obra con el botón de la izquierda.');
+  const isBook = kind === 'books';
+  const slugField = () => {
+    const f = field('Dirección web (español)', o, 'slug', { hint: 'solo minúsculas, números y guiones', onchange: () => { o._slugTouched = true; } });
+    return f;
+  };
+  const onTitle = (v) => { if (isBook && o._new && !o._slugTouched) { o.slug = slugify(v); const el = $('#slugbox input'); if (el) el.value = o.slug; } renderList(); };
+  const onTitlePt = (v) => { if (isBook && o._new && !o._slugPtTouched) { o.slug_pt = slugify(v); const el = $('#slugptbox input'); if (el) el.value = o.slug_pt; } };
+
+  const card = h('div', { class: 'card' });
+  card.append(
+    h('h3', {}, 'Dónde aparece'), whereBox(o),
+    h('h3', {}, 'Título y datos'),
+    h('div', { class: 'grid2' },
+      field('Título', o, 'title', { lang: 'es', onchange: onTitle }),
+      field('Título', o, 'title_pt', { lang: 'pt', hint: 'si lo dejas vacío usa el de español', onchange: onTitlePt }),
+      field('Subtítulo', o, 'subtitle', { lang: 'es' }),
+      field('Subtítulo', o, 'subtitle_pt', { lang: 'pt' }),
+      ...(isBook ? [
+        field('Categoría', o, 'category', { lang: 'es', placeholder: 'Ej.: Comentario doctrinal' }),
+        field('Categoría', o, 'category_pt', { lang: 'pt' })
+      ] : [
+        field('Frase corta', o, 'note', { lang: 'es', hint: 'aparece bajo el subtítulo' }),
+        field('Frase corta', o, 'note_pt', { lang: 'pt' }),
+        field('Fecha estimada', o, 'when', { lang: 'es', placeholder: 'Ej.: otoño 2026' }),
+        field('Fecha estimada', o, 'when_pt', { lang: 'pt', placeholder: 'Ex.: outono de 2026' })
+      ])),
+    h('div', { class: 'grid3', style: 'margin-top:14px' },
+      field('Autor', o, 'author'),
+      ...(isBook ? [
+        field('Idioma del libro', o, 'language', { options: ['Español', 'Português'] }),
+        field('Año', o, 'year', { type: 'number' }),
+        field('Páginas', o, 'pages', { type: 'number' }),
+        field('ISBN', o, 'isbn')
+      ] : []),
+      field('Color de la tapa', o, 'color', { type: 'color', hint: 'si no hay imagen' })),
+    h('h3', {}, 'Portada'),
+    h('div', { class: 'covers' },
+      coverBox(o, 'cover', 'Portada (se usa en ambos idiomas)', () => (isBook ? o.slug : 'proxima-' + slugify(o.title))),
+      coverBox(o, 'cover_pt', 'Portada para português (opcional)', () => (isBook ? o.slug : 'proxima-' + slugify(o.title)) + '-pt')),
+    h('p', { class: 'note' }, 'Ideal: 800×1200 px (proporción 2:3), JPG, PNG o WebP. La portada en portugués solo hace falta si tienes una edición distinta.')
+  );
+  if (isBook) {
+    card.append(
+      h('h3', {}, 'Sinopsis'),
+      h('div', { class: 'grid2' },
+        field('Sinopsis', o, 'description', { lang: 'es', area: true, hint: 'separa los párrafos con una línea en blanco' }),
+        field('Sinopsis', o, 'description_pt', { lang: 'pt', area: true })),
+      h('h3', {}, 'Dónde comprarlo'),
+      h('div', { class: 'grid3' },
+        field('Amazon (papel)', o, 'amazonPrint', { placeholder: 'https://…' }),
+        field('Amazon (Kindle)', o, 'amazonKindle', { placeholder: 'https://…' }),
+        field('Google Play Libros', o, 'googlePlay', { placeholder: 'https://…' })),
+      h('p', { class: 'note' }, 'Los enlaces vacíos se muestran como “Próximamente” / “Em breve”.'),
+      h('details', { class: 'adv', style: 'margin-top:18px' }, h('summary', {}, 'Opciones avanzadas (direcciones web)'),
+        h('div', { class: 'grid2', style: 'margin-top:10px' },
+          h('div', { id: 'slugbox' }, field('Dirección web (español)', o, 'slug', { hint: 'ej.: mi-libro', onchange: () => { o._slugTouched = true; } })),
+          h('div', { id: 'slugptbox' }, field('Dirección web (português)', o, 'slug_pt', { hint: 'ej.: meu-livro', onchange: () => { o._slugPtTouched = true; } }))),
+        h('p', { class: 'note' }, 'Se generan solas a partir del título al crear el libro. Cambiarlas en un libro ya publicado cambia su dirección en Google.'))
+    );
+  }
+  card.append(h('h3', {}, 'Eliminar'),
+    h('button', { class: 'danger', onclick: () => {
+      if (!confirm(`¿Eliminar “${o.title || 'sin título'}” de la lista? Podrás recuperarlo desde las copias en admin/.backups.`)) return;
+      arr.splice(sel[kind], 1); sel[kind] = Math.max(0, sel[kind] - 1); markDirty(); render();
+    } }, isBook ? 'Eliminar este libro' : 'Eliminar esta obra'));
+  return card;
+}
+
+function listPane(kind) {
+  const add = h('button', { class: 'primary', style: 'width:100%;justify-content:center;margin-bottom:12px', onclick: () => {
+    const base = kind === 'books'
+      ? { slug: '', title: 'Nuevo libro', author: data.site.editor || '', language: 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', languages: [...BOTH], _new: true }
+      : { title: 'Nueva obra', author: data.site.editor || '', color: '#0a2a8a', cover: '', languages: [...BOTH], _new: true };
+    data[kind].push(base); sel[kind] = data[kind].length - 1; markDirty(); render();
+  } }, kind === 'books' ? '＋ Añadir libro' : '＋ Añadir próxima obra');
+  return h('div', { class: 'card' }, h('h2', {}, kind === 'books' ? 'Libros publicados' : 'Próximas obras'), add, h('div', { id: 'listbox' }),
+    h('p', { class: 'note' }, 'El orden de esta lista es el orden del sitio. Usa ▲ ▼ para cambiarlo.'));
+}
+
+/* ---------- textos de la editorial ---------- */
+function siteView() {
+  const s = data.site;
+  const para = (lang) => {
+    const o = s[lang]; const ta = h('textarea', {}); ta.value = (o.about || []).join('\n\n');
+    ta.addEventListener('input', () => { o.about = ta.value.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean); markDirty(); });
+    return h('label', { class: 'f' }, h('span', {}, h('span', { class: 'lang-tag ' + lang }, lang.toUpperCase()), 'Texto de “La editorial”', h('span', { class: 'hint' }, ' · párrafos separados por una línea en blanco')), ta);
+  };
+  const col = (lang) => h('div', {},
+    field('Frase principal', s[lang], 'tagline', { lang }),
+    h('div', { style: 'height:14px' }),
+    field('Descripción corta', s[lang], 'description', { lang, area: true }),
+    h('div', { style: 'height:14px' }),
+    field('Cargo del editor', s[lang], 'editorTitle', { lang }),
+    h('div', { style: 'height:14px' }),
+    para(lang),
+    h('div', { style: 'height:14px' }),
+    field('Texto de Contacto', s[lang], 'contactIntro', { lang, area: true }));
+  return h('div', { class: 'card' },
+    h('h3', {}, 'Datos generales'),
+    h('div', { class: 'grid2' }, field('Editor', s, 'editor'), field('Correo de contacto', s, 'email', { type: 'email' })),
+    h('h3', {}, 'Textos por idioma'),
+    h('div', { class: 'grid2' }, col('es'), col('pt')));
+}
+
+/* ---------- publicar ---------- */
+async function refreshGit() { try { git = await api('/api/git'); } catch { git = null; } }
+function publishView() {
+  const msg = h('input', { type: 'text', placeholder: 'Ej.: Añadido el libro nuevo', style: 'width:100%' });
+  msg.className = '';
+  const out = h('pre', { class: 'log', style: 'display:none' });
+  const btn = h('button', { class: 'primary', onclick: async () => {
+    if (dirty) { toast('Primero pulsa “Guardar y actualizar”.', 'bad'); return; }
+    if (!confirm('Esto publicará los cambios en sionbook.com (Vercel tarda 1–2 minutos en mostrarlos). ¿Continuar?')) return;
+    btn.disabled = true; btn.textContent = 'Publicando…';
+    try {
+      const r = await api('/api/publish', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message: msg.value }) });
+      out.style.display = 'block'; out.textContent = r.log || '';
+      toast(r.ok ? 'Publicado. En 1–2 minutos estará en sionbook.com' : 'No se pudo publicar. Mira el detalle abajo.', r.ok ? 'good' : 'bad');
+      await refreshGit(); if (r.ok) render();
+    } catch (e) { toast(e.message, 'bad'); }
+    btn.disabled = false; btn.textContent = 'Publicar en sionbook.com';
+  } }, 'Publicar en sionbook.com');
+  const wrap = h('div', { class: 'card' },
+    h('h2', {}, 'Publicar en sionbook.com'),
+    h('p', {}, 'Cuando estés conforme con cómo se ve en la vista previa (', h('a', { href: 'http://localhost:3000', target: '_blank' }, 'localhost:3000'), '), publica. Los cambios se guardan en GitHub y Vercel actualiza la web sola.'),
+    git ? h('div', { class: 'stat' }, h('div', {}, h('b', {}, git.changes), 'archivos con cambios'), h('div', {}, h('b', {}, git.ahead), 'versiones aún sin publicar'), h('div', {}, 'Última versión', h('b', { style: 'font-size:14px' }, git.last || '—'))) : null,
+    h('label', { class: 'f' }, 'Nota de esta actualización ', h('span', { class: 'hint' }, '(opcional)'), msg),
+    h('div', { style: 'margin-top:14px' }, btn), out);
+  return wrap;
+}
+
+/* ---------- render ---------- */
+function render() {
+  document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  view.replaceChildren();
+  if (tab === 'books' || tab === 'upcoming') {
+    view.append(h('div', { class: 'layout' }, listPane(tab), editor(tab)));
+    renderList();
+  } else if (tab === 'site') view.append(siteView());
+  else view.append(publishView());
+}
+
+$('#tabs').addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-tab]'); if (!b) return;
+  tab = b.dataset.tab; if (tab === 'publish') await refreshGit(); render();
+});
+
+$('#save').addEventListener('click', async () => {
+  const btn = $('#save'); btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    // Los textos numéricos se guardan como números; los campos vacíos opcionales se quitan
+    const payload = JSON.parse(JSON.stringify(data));
+    for (const b of payload.books) for (const k of ['year', 'pages']) { if (b[k] === '' || b[k] == null) b[k] = ''; else if (!isNaN(b[k])) b[k] = Number(b[k]); }
+    const r = await api('/api/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+    if (!r.ok) throw new Error(r.error || r.log || 'No se pudo guardar');
+    data.books.forEach((b) => { delete b._new; }); data.upcoming.forEach((u) => { delete u._new; });
+    markClean(); lastLog = r.log;
+    const warn = (r.log.match(/⚠[^\n]*/g) || []);
+    toast(warn.length ? `Guardado. Avisos: ${warn.slice(0, 2).join(' · ')}` : 'Guardado. La vista previa ya está actualizada.', warn.length ? '' : 'good');
+  } catch (e) { toast(e.message, 'bad'); }
+  btn.disabled = false; btn.textContent = 'Guardar y actualizar';
+});
+
+(async () => {
+  data = await api('/api/data');
+  data.books.forEach((b) => { if (!Array.isArray(b.languages)) b.languages = [...BOTH]; });
+  data.upcoming.forEach((u) => { if (!Array.isArray(u.languages)) u.languages = [...BOTH]; });
+  render();
+})();
+</script>
+</body>
+</html>

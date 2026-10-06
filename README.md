@@ -23,3 +23,11 @@ El español vive en la raíz (`/`) y el portugués en `/pt/`, con selector **ES 
 - Textos fijos de la interfaz (botones, menús, etiquetas): objeto `T` al principio de `build.mjs`.
 - Título y dirección en portugués: `title_pt` y `slug_pt` (opcionales; sin ellos se usa el original). En próximas obras: `title_pt`.
 - La traducción es manual a propósito: un traductor automático puede estropear un título.
+
+## Panel de administración
+Doble clic en `abrir-panel.bat` (o `node admin.mjs`) → http://localhost:4000. Solo funciona en tu computadora (escucha únicamente en 127.0.0.1) y no se publica.
+- Añadir, editar, ordenar y eliminar libros y próximas obras; subir portadas; elegir en qué idioma (ES, PT o ambos) aparece cada uno.
+- Editar los textos de la editorial en español y português.
+- **Guardar y actualizar** regenera la vista previa (http://localhost:3000); **Publicar** guarda en GitHub y Vercel actualiza sionbook.com.
+- Antes de cada guardado se hace una copia en `admin/.backups/` (no se sube a GitHub).
+- Un libro o próxima obra con `languages: ["es"]` solo sale en español; sin ese campo, sale en ambos.
