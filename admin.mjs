@@ -58,7 +58,8 @@ const server = http.createServer(async (req, res) => {
     const host = (req.headers.host || '').toLowerCase();
     if (host !== `localhost:${PORT}` && host !== `127.0.0.1:${PORT}`) return send(res, 403, 'text/plain', 'Acceso denegado');
     const url = new URL(req.url, `http://${host}`);
-    const p = decodeURIComponent(url.pathname);
+    let p = decodeURIComponent(url.pathname);
+    if (p === '/api/admin/' || p === '/api/admin') p = '/api/' + (url.searchParams.get('action') || ''); // misma ruta que en sionbook.com
 
     if (req.method === 'GET') {
       if (p === '/') return send(res, 200, types['.html'], fs.readFileSync(file('admin/index.html')));

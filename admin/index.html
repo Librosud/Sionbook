@@ -131,6 +131,8 @@ function toast(msg, kind = '') {
   $('#toasts').append(t); setTimeout(() => t.remove(), kind === 'bad' ? 9000 : 4000);
 }
 async function api(path, opts = {}) {
+  // Todas las llamadas van a la misma función: /api/admin/?action=<nombre>
+  const m = path.match(/^\/api\/([a-z]+)$/); if (m) path = '/api/admin/?action=' + m[1];
   const r = await fetch(path, { ...opts, headers: { 'x-admin': '1', ...(opts.headers || {}) } });
   const j = await r.json().catch(() => ({ ok: false, error: 'Respuesta no válida' }));
   if (!r.ok && !j.log) throw new Error(j.error || 'Error ' + r.status);
