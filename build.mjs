@@ -35,7 +35,7 @@ const T = {
     soon: 'Próximamente', coverOf: 'Portada de', newTab: 'se abre en una pestaña nueva',
     stores: { amazonPrint: 'Papel en', amazonKindle: 'Kindle en', googlePlay: 'Ebook en' }, playName: 'Google Play Libros',
     meta: { author: 'Autor', category: 'Categoría', language: 'Idioma', year: 'Año', pages: 'Páginas', isbn: 'ISBN' },
-    bookFallback: (b) => `${b.title}, de ${b.author}. Cómpralo en papel, Kindle o Google Play Libros.`,
+    bookFallback: (b, title) => `${title}, de ${b.author}. Cómpralo en papel, Kindle o Google Play Libros.`,
     upcLead: 'Los libros que estamos preparando. Cuando se publiquen, los encontrarás en el catálogo con enlaces a Amazon y Google Play Libros.',
     upcDesc: (list) => `Próximas obras de ${site.name}: ${list}.`, seeCatalog: 'Ver el catálogo →', exploreCat: 'Explora el catálogo →',
     aboutTitle: 'La editorial', aboutDesc: `Conoce ${site.name}, editorial independiente de libros en español y portugués dirigida por ${site.editor}.`,
@@ -58,7 +58,7 @@ const T = {
     soon: 'Em breve', coverOf: 'Capa de', newTab: 'abre em uma nova aba',
     stores: { amazonPrint: 'Papel na', amazonKindle: 'Kindle na', googlePlay: 'Ebook no' }, playName: 'Google Play Livros',
     meta: { author: 'Autor', category: 'Categoria', language: 'Idioma', year: 'Ano', pages: 'Páginas', isbn: 'ISBN' },
-    bookFallback: (b) => `${b.title}, de ${b.author}. Compre em papel, Kindle ou Google Play Livros.`,
+    bookFallback: (b, title) => `${title}, de ${b.author}. Compre em papel, Kindle ou Google Play Livros.`,
     upcLead: 'Os livros que estamos preparando. Quando forem publicados, você os encontrará no catálogo com links para a Amazon e o Google Play Livros.',
     upcDesc: (list) => `Próximas obras da ${site.name}: ${list}.`, seeCatalog: 'Ver o catálogo →', exploreCat: 'Explore o catálogo →',
     aboutTitle: 'A editora', aboutDesc: `Conheça a ${site.name}, editora independente de livros em espanhol e português dirigida por ${site.editor}.`,
@@ -73,7 +73,9 @@ const R = {
   es: { home: '/', catalog: '/catalogo/', upcoming: '/proximas-obras/', about: '/sobre-nosotros/', contact: '/contacto/', books: '/libros/' },
   pt: { home: '/pt/', catalog: '/pt/catalogo/', upcoming: '/pt/proximas-obras/', about: '/pt/sobre-nos/', contact: '/pt/contato/', books: '/pt/livros/' }
 };
-const routeOf = (lang, key) => (key.startsWith('book:') ? `${R[lang].books}${key.slice(5)}/` : R[lang][key]);
+const slugOf = (lang, b) => (lang !== 'es' && b[`slug_${lang}`]) || b.slug;
+// Las claves de libro usan el slug en español: "book:<slug>"
+const routeOf = (lang, key) => (key.startsWith('book:') ? `${R[lang].books}${slugOf(lang, books.find((b) => b.slug === key.slice(5)))}/` : R[lang][key]);
 // Campo traducido: usa `campo_pt` si existe en portugués; si no, el original
 const loc = (lang, obj, key) => (lang !== 'es' && obj[`${key}_${lang}`]) || obj[key];
 
@@ -109,6 +111,8 @@ for (const b of books) {
   if (!b.slug || !/^[a-z0-9-]+$/.test(b.slug)) throw new Error(`Libro "${b.title}": slug inválido (solo a-z, 0-9 y guiones).`);
   if (slugs.has(b.slug)) throw new Error(`Slug repetido: ${b.slug}`);
   slugs.add(b.slug);
+  if (b.slug_pt && !/^[a-z0-9-]+$/.test(b.slug_pt)) throw new Error(`Libro ${b.slug}: slug_pt inválido (solo a-z, 0-9 y guiones).`);
+  if (!b.title_pt) console.warn(`⚠ ${b.slug}: sin title_pt (la versión en portugués usará el título en español).`);
   if (!b.title || !b.author) throw new Error(`Libro ${b.slug}: faltan título o autor.`);
   for (const k of ['amazonPrint', 'amazonKindle', 'googlePlay']) {
     if (b[k] && !/^https:\/\//.test(b[k])) console.warn(`⚠ ${b.slug}: ${k} debería empezar por https://`);
@@ -190,14 +194,15 @@ function buildLang(lang) {
   const s = site[lang];
   const r = R[lang];
   const other = LANGS.find((l) => l !== lang);
-  const bookPath = (b) => `${r.books}${b.slug}/`;
+  const bookPath = (b) => `${r.books}${slugOf(lang, b)}/`;
+  const titleOf = (b) => loc(lang, b, 'title');
   const altOf = (key) => ({ es: routeOf('es', key), pt: routeOf('pt', key) });
 
   // Páginas en orden de lectura
   const pages = [
     { key: 'home', path: r.home, title: t.home },
     { key: 'catalog', path: r.catalog, title: t.catalog },
-    ...books.map((b) => ({ key: `book:${b.slug}`, path: bookPath(b), title: b.title })),
+    ...books.map((b) => ({ key: `book:${b.slug}`, path: bookPath(b), title: titleOf(b) })),
     ...(upcoming.length ? [{ key: 'upcoming', path: r.upcoming, title: t.upcoming }] : []),
     { key: 'about', path: r.about, title: t.about },
     { key: 'contact', path: r.contact, title: t.contact }
@@ -211,7 +216,7 @@ function buildLang(lang) {
   const langName = (l) => t.languages[(l || '').toLowerCase()] || l;
 
   function cover(b, { cls = '', decorative = false } = {}) {
-    const title = b.title;
+    const title = titleOf(b);
     const sub = loc(lang, b, 'subtitle');
     const c = `class="cover${cls ? ' ' + cls : ''}" style="--c:${colorOf(b)}"`;
     if (b.cover) {
@@ -223,14 +228,14 @@ function buildLang(lang) {
   }
 
   function card(b, withCategory = false) {
-    return `<li class="card"${withCategory ? ` data-category="${esc(catOf(b) || '')}"` : ''}>${cover(b, { decorative: true })}${catOf(b) ? `<p class="card-cat">${esc(catOf(b))}</p>` : ''}<h3 class="card-title"><a href="${bookPath(b)}">${esc(b.title)}</a></h3><p class="card-author">${esc(b.author)}</p></li>`;
+    return `<li class="card"${withCategory ? ` data-category="${esc(catOf(b) || '')}"` : ''}>${cover(b, { decorative: true })}${catOf(b) ? `<p class="card-cat">${esc(catOf(b))}</p>` : ''}<h3 class="card-title"><a href="${bookPath(b)}">${esc(titleOf(b))}</a></h3><p class="card-author">${esc(b.author)}</p></li>`;
   }
 
   function soonCard(b) {
     const sub = loc(lang, b, 'subtitle');
     const note = loc(lang, b, 'note');
     const when = loc(lang, b, 'when');
-    return `<li class="card card--soon">${cover(b, { decorative: true })}<p class="card-cat">${t.soon}${when ? ' · ' + esc(when) : ''}</p><h3 class="card-title">${esc(b.title)}</h3>${sub ? `<p class="card-sub">${esc(sub)}</p>` : ''}${note ? `<p class="card-note">${esc(note)}</p>` : ''}<p class="card-author">${esc(b.author)}</p></li>`;
+    return `<li class="card card--soon">${cover(b, { decorative: true })}<p class="card-cat">${t.soon}${when ? ' · ' + esc(when) : ''}</p><h3 class="card-title">${esc(titleOf(b))}</h3>${sub ? `<p class="card-sub">${esc(sub)}</p>` : ''}${note ? `<p class="card-note">${esc(note)}</p>` : ''}<p class="card-author">${esc(b.author)}</p></li>`;
   }
 
   // Selector de idioma ES | PT (el idioma actual va resaltado)
@@ -253,7 +258,7 @@ function buildLang(lang) {
     const li = main.map((it) => {
       const aria = current === it.path ? ' aria-current="page"' : it.kids && current.startsWith(r.books) ? ' aria-current="true"' : '';
       const kids = it.kids && books.length
-        ? `<ol class="toc toc--sub">${books.slice(0, 8).map((b) => `<li><a href="${bookPath(b)}"${current === bookPath(b) ? ' aria-current="page"' : ''}><span class="toc-title">${esc(b.title)}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(bookPath(b)) + 1}</span></a></li>`).join('')}</ol>`
+        ? `<ol class="toc toc--sub">${books.slice(0, 8).map((b) => `<li><a href="${bookPath(b)}"${current === bookPath(b) ? ' aria-current="page"' : ''}><span class="toc-title">${esc(titleOf(b))}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(bookPath(b)) + 1}</span></a></li>`).join('')}</ol>`
         : '';
       return `<li><a href="${it.path}"${aria}><span class="toc-num" aria-hidden="true">${it.num}</span><span class="toc-title">${it.label}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(it.path) + 1}</span></a>${kids}</li>`;
     }).join('');
@@ -329,32 +334,33 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
   for (const b of books) {
     const p = bookPath(b);
     const key = `book:${b.slug}`;
+    const bt = titleOf(b);
     const sub = loc(lang, b, 'subtitle');
     const descRaw = loc(lang, b, 'description') || '';
     const descLang = lang !== 'es' && !b[`description_${lang}`] ? 'es' : lang;
     const buttons = stores.map((st) => {
       const kicker = t.stores[st.key];
       return b[st.key]
-        ? `<a class="btn" href="${esc(b[st.key])}" target="_blank" rel="noopener nofollow" aria-label="${kicker} ${st.label}: ${esc(b.title)} (${t.newTab})"><span class="btn-kicker">${kicker}</span><span class="btn-label">${st.label}</span></a>`
+        ? `<a class="btn" href="${esc(b[st.key])}" target="_blank" rel="noopener nofollow" aria-label="${kicker} ${st.label}: ${esc(bt)} (${t.newTab})"><span class="btn-kicker">${kicker}</span><span class="btn-label">${st.label}</span></a>`
         : `<span class="btn is-disabled" aria-disabled="true"><span class="btn-kicker">${t.soon}</span><span class="btn-label">${kicker} ${st.label}</span></span>`;
     }).join('');
     const meta = [
       [t.meta.author, b.author], [t.meta.category, catOf(b)], [t.meta.language, langName(b.language)], [t.meta.year, b.year], [t.meta.pages, b.pages], [t.meta.isbn, b.isbn]
     ].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
     const desc = descRaw.replace(/\s+/g, ' ').trim();
-    const metaDesc = desc ? (desc.length > 155 ? desc.slice(0, 152).replace(/\s+\S*$/, '') + '…' : desc) : t.bookFallback(b);
+    const metaDesc = desc ? (desc.length > 155 ? desc.slice(0, 152).replace(/\s+\S*$/, '') + '…' : desc) : t.bookFallback(b, bt);
     const work = stores.filter((st) => b[st.key]).map((st) => ({ '@type': 'Book', bookFormat: st.format, url: b[st.key], isbn: undefined }));
     outPage(p, document_({
       lang, path: p, order: folioOf(p) + 1, page: 'book', alt: altOf(key),
-      title: `${b.title}${sub ? ': ' + sub : ''} — ${b.author} | ${site.name}`,
+      title: `${bt}${sub ? ': ' + sub : ''} — ${b.author} | ${site.name}`,
       description: metaDesc,
       og: { type: 'book', image: b.cover },
       left: leftPage(p, cover(b, { cls: 'only-wide', decorative: true }), key),
       right: rightPage(p, `
-<nav class="breadcrumb" aria-label="${t.crumbAria}"><a href="${r.catalog}">${t.catalog}</a> / <span>${esc(b.title)}</span></nav>
+<nav class="breadcrumb" aria-label="${t.crumbAria}"><a href="${r.catalog}">${t.catalog}</a> / <span>${esc(bt)}</span></nav>
 ${cover(b, { cls: 'only-narrow' })}
 ${catOf(b) ? `<p class="eyebrow">${esc(catOf(b))}</p>` : ''}
-<h1>${esc(b.title)}</h1>
+<h1>${esc(bt)}</h1>
 ${sub ? `<p class="subtitle">${esc(sub)}</p>` : ''}
 <p class="byline">${esc(b.author)}</p>
 <h2>${t.buy}</h2>
@@ -365,7 +371,7 @@ ${rule}
 <dl class="meta">${meta}</dl>`),
       ld: [
         {
-          '@context': 'https://schema.org', '@type': 'Book', name: b.title, alternativeHeadline: sub || undefined,
+          '@context': 'https://schema.org', '@type': 'Book', name: bt, alternativeHeadline: sub || undefined,
           author: { '@type': 'Person', name: b.author }, inLanguage: langCode(b.language), url: abs(p), description: desc || undefined,
           publisher: { '@type': 'Organization', name: site.name, url: site.url }, isbn: b.isbn || undefined,
           numberOfPages: b.pages || undefined, datePublished: b.year ? String(b.year) : undefined, genre: catOf(b) || undefined,
@@ -376,7 +382,7 @@ ${rule}
           itemListElement: [
             { '@type': 'ListItem', position: 1, name: t.home, item: abs(r.home) },
             { '@type': 'ListItem', position: 2, name: t.catalog, item: abs(r.catalog) },
-            { '@type': 'ListItem', position: 3, name: b.title, item: abs(p) }
+            { '@type': 'ListItem', position: 3, name: bt, item: abs(p) }
           ]
         }
       ]
@@ -387,7 +393,7 @@ ${rule}
   if (upcoming.length) outPage(r.upcoming, document_({
     lang, path: r.upcoming, order: folioOf(r.upcoming) + 1, page: 'upcoming', alt: altOf('upcoming'),
     title: `${t.upcoming} — ${site.name}`,
-    description: t.upcDesc(upcoming.map((u) => { const sub = loc(lang, u, 'subtitle'); return u.title + (sub ? ' (' + sub + ')' : ''); }).join('; ')),
+    description: t.upcDesc(upcoming.map((u) => { const sub = loc(lang, u, 'subtitle'); return titleOf(u) + (sub ? ' (' + sub + ')' : ''); }).join('; ')),
     left: leftPage(r.upcoming, defaultExtra, 'upcoming'),
     right: rightPage(r.upcoming, `
 <p class="eyebrow">${t.chapter} ${chapter('upcoming')}</p>

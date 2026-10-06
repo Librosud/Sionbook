@@ -17,7 +17,9 @@
     "googlePlay": "",
     "subtitle_pt": "Tomo I: Mateus e Marcos",
     "category_pt": "Comentário doutrinário",
-    "description_pt": "Perguntas e respostas sobre o contexto histórico, cultural e doutrinário dos Evangelhos de Mateus e Marcos, com comentário SUD.\n\nO Tomo I desta obra acompanha a leitura dos Evangelhos com o contexto que ajuda a entendê-los melhor. Editor Geral: Lucas Calveiro."
+    "description_pt": "Perguntas e respostas sobre o contexto histórico, cultural e doutrinário dos Evangelhos de Mateus e Marcos, com comentário SUD.\n\nO Tomo I desta obra acompanha a leitura dos Evangelhos com o contexto que ajuda a entendê-los melhor. Editor Geral: Lucas Calveiro.",
+    "title_pt": "Comentário doutrinário do Novo Testamento",
+    "slug_pt": "comentario-doutrinario-novo-testamento-tomo-1"
   },
   {
     "slug": "quien-es-quien-en-el-nuevo-testamento",
@@ -37,6 +39,8 @@
     "googlePlay": "",
     "subtitle_pt": "Dicionário biográfico e doutrinário de pessoas, grupos e conceitos do Novo Testamento",
     "category_pt": "Dicionário bíblico",
-    "description_pt": "Dicionário biográfico e doutrinário de pessoas, grupos e conceitos do Novo Testamento.\n\nUma obra de consulta para conhecer os personagens e grupos que aparecem no Novo Testamento e os conceitos-chave de sua mensagem. Editor Geral: Lucas Calveiro."
+    "description_pt": "Dicionário biográfico e doutrinário de pessoas, grupos e conceitos do Novo Testamento.\n\nUma obra de consulta para conhecer os personagens e grupos que aparecem no Novo Testamento e os conceitos-chave de sua mensagem. Editor Geral: Lucas Calveiro.",
+    "title_pt": "Quem é quem no Novo Testamento",
+    "slug_pt": "quem-e-quem-no-novo-testamento"
   }
 ]
