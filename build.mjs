@@ -43,7 +43,7 @@ const T = {
     upcDesc: (list) => `Próximas obras de ${site.name}: ${list}.`, seeCatalog: 'Ver el catálogo →', exploreCat: 'Explora el catálogo →',
     aboutTitle: 'La editorial', aboutDesc: `Conoce ${site.name}, editorial independiente de libros en español y portugués dirigida por ${site.editor}.`,
     contactTitle: 'Contacto', contactDesc: `Escribe a ${site.name} para consultas sobre libros, prensa, distribución o colaboraciones.`, writeTo: 'Escríbenos a',
-    langAria: 'Idioma de la web', switchTo: 'Leer en portugués', openToc: 'Abrir el índice del libro',
+    langAria: 'Idioma de la web', switchTo: 'Leer en portugués', openToc: 'Abrir la hoja izquierda del libro', booksLabel: 'Libros', backToc: 'Índice',
     languages: { 'español': 'Español', 'portugués': 'Portugués', 'português': 'Portugués', 'english': 'Inglés', 'inglés': 'Inglés' }
   },
   pt: {
@@ -66,7 +66,7 @@ const T = {
     upcDesc: (list) => `Próximas obras da ${site.name}: ${list}.`, seeCatalog: 'Ver o catálogo →', exploreCat: 'Explore o catálogo →',
     aboutTitle: 'A editora', aboutDesc: `Conheça a ${site.name}, editora independente de livros em espanhol e português dirigida por ${site.editor}.`,
     contactTitle: 'Contato', contactDesc: `Escreva para a ${site.name} para consultas sobre livros, imprensa, distribuição ou colaborações.`, writeTo: 'Escreva para',
-    langAria: 'Idioma do site', switchTo: 'Ler em espanhol', openToc: 'Abrir o índice do livro',
+    langAria: 'Idioma do site', switchTo: 'Ler em espanhol', openToc: 'Abrir a página esquerda do livro', booksLabel: 'Livros', backToc: 'Índice',
     languages: { 'español': 'Espanhol', 'portugués': 'Português', 'português': 'Português', 'english': 'Inglês', 'inglés': 'Inglês' }
   }
 };
@@ -254,23 +254,32 @@ function buildLang(lang) {
     return `<div class="lang" role="group" aria-label="${t.langAria}">${LANGS.map(item).join('')}</div>`;
   }
 
-  function leftPage(current, extra, key) {
-    const main = [
-      { path: r.home, label: t.home },
-      { path: r.catalog, label: t.catalog, kids: true },
-      ...(up.length ? [{ path: r.upcoming, label: t.upcoming }] : []),
-      { path: r.about, label: t.about },
-      { path: r.contact, label: t.contact }
-    ].map((it, i) => ({ ...it, num: roman[i] }));
-    const li = main.map((it) => {
-      const aria = current === it.path ? ' aria-current="page"' : it.kids && current.startsWith(r.books) ? ' aria-current="true"' : '';
-      const kids = it.kids && bk.length
-        ? `<ol class="toc toc--sub">${bk.slice(0, 8).map((b) => `<li><a href="${bookPath(b)}"${current === bookPath(b) ? ' aria-current="page"' : ''}><span class="toc-title">${esc(titleOf(b))}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(bookPath(b)) + 1}</span></a></li>`).join('')}</ol>`
-        : '';
-      return `<li><a href="${it.path}"${aria}><span class="toc-num" aria-hidden="true">${it.num}</span><span class="toc-title">${it.label}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(it.path) + 1}</span></a>${kids}</li>`;
-    }).join('');
+  // La hoja izquierda cambia según dónde estés:
+  //  'home'    → índice con todas las secciones
+  //  'catalog' → solo los nombres de los libros
+  //  'book'    → solo la portada del libro
+  //  'plain'   → adorno y lema de la editorial
+  // En todas menos Inicio hay un enlace "← Índice" para volver al índice.
+  function leftPage(current, extra, key, kind = 'plain') {
+    const folioN = (path) => folioOf(path) + 1;
+    let nav = '';
+    if (kind === 'home') {
+      const main = [
+        { path: r.home, label: t.home },
+        { path: r.catalog, label: t.catalog },
+        ...(up.length ? [{ path: r.upcoming, label: t.upcoming }] : []),
+        { path: r.about, label: t.about },
+        { path: r.contact, label: t.contact }
+      ].map((it, i) => ({ ...it, num: roman[i] }));
+      const li = main.map((it) => `<li><a href="${it.path}"${current === it.path ? ' aria-current="page"' : ''}><span class="toc-num" aria-hidden="true">${it.num}</span><span class="toc-title">${it.label}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioN(it.path)}</span></a></li>`).join('');
+      nav = `<nav aria-label="${t.tocAria}"><p class="toc-label" aria-hidden="true">${t.toc}</p><ol class="toc">${li}</ol></nav>`;
+    } else if (kind === 'catalog') {
+      const li = bk.map((b) => `<li><a href="${bookPath(b)}"><span class="toc-title">${esc(titleOf(b))}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioN(bookPath(b))}</span></a></li>`).join('');
+      nav = `<nav aria-label="${t.booksLabel}"><p class="toc-label" aria-hidden="true">${t.booksLabel}</p><ol class="toc toc--books">${li}</ol></nav>`;
+    }
+    const back = kind === 'home' ? '' : `<a class="back-index" href="${r.home}">← ${t.backToc}</a>`;
     return `<header class="head"><a class="brand" href="${r.home}"${current === r.home ? ' aria-current="page"' : ''}>${logo}<span class="brand-sub">${t.publisher}</span></a>${langSwitch(key)}</header>
-<nav aria-label="${t.tocAria}"><p class="toc-label" aria-hidden="true">${t.toc}</p><ol class="toc">${li}</ol></nav>
+${back}${nav}
 <div class="left-extra">${extra}</div>
 <footer class="left-footer"><p>© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}</p><p>${t.leftFoot}</p></footer>`;
   }
@@ -283,7 +292,8 @@ function buildLang(lang) {
       const next = pages[i + 1];
       folio = `<nav class="folio" aria-label="${t.turnAria}">${prev ? `<a class="prev" rel="prev" href="${prev.path}">← ${esc(prev.title)}</a>` : '<span></span>'}<span class="folio-num" aria-hidden="true">— ${i + 1} —</span>${next ? `<a class="next" rel="next" href="${next.path}">${esc(next.title)} →</a>` : '<span></span>'}</nav>`;
     }
-    const ribbon = `<button type="button" class="ribbon-btn" aria-label="${t.openToc}" aria-expanded="false" aria-controls="page-left"></button>`;
+    const deco = key === 'home' || !key ? `<span class="ribbon" aria-hidden="true"></span>` : `<a class="ribbon" href="${r.home}" aria-label="${t.backToc}" title="${t.backToc}"></a>`;
+    const ribbon = deco + `<button type="button" class="ribbon-btn" aria-label="${t.openToc}" aria-expanded="false" aria-controls="page-left"></button>`;
     return `${ribbon}${key ? langSwitch(key).replace('class="lang"', 'class="lang lang--mini"') : ''}<div class="content">${content}</div>${folio}<p class="mobile-footer">© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}. ${t.mobileFoot}</p>`;
   }
 
@@ -296,7 +306,7 @@ function buildLang(lang) {
     lang, path: r.home, order: 1, page: 'home', alt: altOf('home'),
     title: `${site.name} — ${s.tagline}`,
     description: s.description,
-    left: leftPage(r.home, defaultExtra, 'home'),
+    left: leftPage(r.home, defaultExtra, 'home', 'home'),
     right: rightPage(r.home, `
 <p class="eyebrow">${t.homeEyebrow}</p>
 <h1>${esc(s.tagline)}</h1>
@@ -322,7 +332,7 @@ ${rule}
     lang, path: r.catalog, order: 2, page: 'catalog', alt: altOf('catalog'),
     title: `${t.catTitle} — ${site.name}`,
     description: t.catDesc(bk.length),
-    left: leftPage(r.catalog, defaultExtra, 'catalog'),
+    left: leftPage(r.catalog, defaultExtra, 'catalog', 'catalog'),
     right: rightPage(r.catalog, `
 <p class="eyebrow">${t.chapter} ${chapter('catalog')}</p>
 <h1>${t.catalog}</h1>
@@ -363,7 +373,7 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
       title: `${bt}${sub ? ': ' + sub : ''} — ${b.author} | ${site.name}`,
       description: metaDesc,
       og: { type: 'book', image: loc(lang, b, 'cover') },
-      left: leftPage(p, cover(b, { cls: 'only-wide', decorative: true }), key),
+      left: leftPage(p, cover(b, { cls: 'only-wide', decorative: true }), key, 'book'),
       right: rightPage(p, `
 <nav class="breadcrumb" aria-label="${t.crumbAria}"><a href="${r.catalog}">${t.catalog}</a> / <span>${esc(bt)}</span></nav>
 ${cover(b, { cls: 'only-narrow' })}
@@ -457,7 +467,7 @@ const built = Object.fromEntries(LANGS.map((l) => [l, buildLang(l)]));
     title: `Página no encontrada · Página não encontrada — ${site.name}`,
     description: 'La página que buscas no existe. · A página que você procura não existe.',
     left,
-    right: `<button type="button" class="ribbon-btn" aria-label="Abrir el índice del libro" aria-expanded="false" aria-controls="page-left"></button><div class="content">
+    right: `<a class="ribbon" href="/" aria-label="Índice" title="Índice"></a><button type="button" class="ribbon-btn" aria-label="Abrir el índice del libro" aria-expanded="false" aria-controls="page-left"></button><div class="content">
 <p class="eyebrow">Error 404</p>
 <h1>Esta página no está en el libro</h1>
 <p class="lead">Puede que el enlace sea antiguo o esté mal escrito.</p>

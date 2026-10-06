@@ -37,3 +37,10 @@ En pantallas estrechas el libro sigue siendo una doble página, pero solo se ve 
 - Abrir el índice: tocar el borde izquierdo, tocar la cinta azul o deslizar el dedo desde el borde izquierdo. Cerrarlo: tocar el borde derecho o deslizar a la izquierda.
 - Pasar de sección: deslizar a la izquierda (siguiente) o a la derecha (anterior), o usar los enlaces anterior/siguiente. Al elegir una sección del índice, se vuelve a la hoja derecha y se pasa la hoja con la misma animación que en escritorio.
 - Sin JavaScript, el móvil usa el diseño apilado de siempre (todo sigue funcionando).
+
+## Hoja izquierda según la sección
+- **Inicio:** índice con todas las secciones.
+- **Catálogo:** solo los nombres de los libros (con scroll si la lista crece).
+- **Ficha de un libro:** solo su portada; la descripción y los botones de compra van a la derecha.
+- **Resto de secciones:** adorno y lema.
+En todas menos Inicio hay un enlace "← Índice" arriba; la cinta azul de la hoja derecha también lleva al índice (en móvil abre la hoja izquierda).
