@@ -25,8 +25,6 @@
   var wide = window.matchMedia('(min-width: 900px)');
   var cache = new Map();
   var busy = false;
-  var DURATION = 950;
-  var EASE = 'cubic-bezier(.55,.05,.3,1)';
 
   function left() { return document.getElementById('page-left'); }
   function right() { return document.getElementById('page-right'); }
@@ -112,27 +110,92 @@
     });
   }
 
-  function makeFace(kind, html) {
-    var face = document.createElement('div');
-    face.className = 'face face--' + kind + ' paper ' + (kind === 'front' ? 'paper--right' : 'paper--left');
-    var box = document.createElement('div');
-    box.className = 'page-inner';
-    box.innerHTML = html;
-    face.appendChild(box);
-    var shade = document.createElement('i');
-    shade.className = 'shade';
-    face.appendChild(shade);
-    return face;
+  /* ---- Hoja que se pasa: la esquina superior derecha se levanta y el doblez avanza en diagonal ----
+     Geometría: la esquina C se arrastra hasta C' (hacia la izquierda, describiendo un arco). El doblez es la mediatriz de C-C'.
+     - La parte plana (a un lado del doblez) sigue siendo la hoja que se va.
+     - La parte doblada se refleja sobre el doblez y muestra el reverso (la hoja izquierda nueva).
+     - Debajo va quedando a la vista la página nueva. */
+  function clipPoly(poly, nx, ny, d) {
+    // Recorta el polígono conservando los puntos con nx*x + ny*y >= d
+    var out = [];
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length];
+      var da = nx * a[0] + ny * a[1] - d, db = nx * b[0] + ny * b[1] - d;
+      if (da >= 0) out.push(a);
+      if ((da >= 0) !== (db >= 0)) { var t = da / (da - db); out.push([a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])]); }
+    }
+    return out;
+  }
+  function setPoly(el, poly, dx) {
+    if (poly.length < 3) { el.style.visibility = 'hidden'; return; }
+    var css = 'polygon(' + poly.map(function (p) { return (p[0] + dx).toFixed(1) + 'px ' + p[1].toFixed(1) + 'px'; }).join(',') + ')';
+    el.style.visibility = 'visible';
+    el.style.clipPath = css;
+    el.style.webkitClipPath = css;
   }
 
-  function makeLeaf(frontHTML, backHTML, height) {
-    var leaf = document.createElement('div');
-    leaf.className = 'leaf';
-    leaf.setAttribute('aria-hidden', 'true');
-    leaf.style.height = height + 'px';
-    leaf.appendChild(makeFace('front', frontHTML));
-    leaf.appendChild(makeFace('back', backHTML));
-    return leaf;
+  function makeCurl(frontHTML, flapHTML, W, H, X0) {
+    var el = document.createElement('div');
+    el.className = 'curl';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML =
+      '<div class="curl-layer curl-under"><i class="curl-strip"></i></div>' +
+      '<div class="curl-layer curl-front"><div class="curl-page paper paper--right"><div class="page-inner"></div></div><i class="curl-strip"></i></div>' +
+      '<div class="curl-layer curl-flap"><div class="curl-page paper paper--left"><div class="page-inner"></div></div><i class="curl-strip"></i></div>';
+    var under = el.querySelector('.curl-under'), front = el.querySelector('.curl-front'), flap = el.querySelector('.curl-flap');
+    var fp = front.querySelector('.curl-page'), lp = flap.querySelector('.curl-page');
+    fp.querySelector('.page-inner').innerHTML = frontHTML;
+    lp.querySelector('.page-inner').innerHTML = flapHTML;
+    fp.style.cssText = 'left:' + X0 + 'px;width:' + W + 'px;height:' + H + 'px';
+    lp.style.cssText = 'left:0;width:' + W + 'px;height:' + H + 'px;transform-origin:0 0';
+    var uS = under.querySelector('.curl-strip'), fS = front.querySelector('.curl-strip'), lS = flap.querySelector('.curl-strip');
+    var L = 2 * (W + H), rect = [[0, 0], [W, 0], [W, H], [0, H]], amp = Math.min(W * 0.5, 380);
+
+    function strip(node, x, y, deg) {
+      node.style.height = L + 'px';
+      node.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + deg.toFixed(2) + 'deg) translate(0,' + (-L / 2) + 'px)';
+    }
+
+    // s: 0 = hoja en su sitio, 1 = hoja completamente pasada
+    function draw(s) {
+      if (s <= 0.0005) { setPoly(front, rect, X0); setPoly(flap, [], 0); setPoly(under, [], 0); return; }
+      if (s > 1) s = 1;
+      var cx = W - 2 * W * s, cy = amp * Math.sin(Math.PI * s);       // posición de la esquina arrastrada
+      var dx = cx - W, len = Math.sqrt(dx * dx + cy * cy), nx = dx / len, ny = cy / len;
+      var px = (W + cx) / 2, py = cy / 2, d = px * nx + py * ny;         // punto medio y distancia del doblez
+      var flat = clipPoly(rect, nx, ny, d), folded = clipPoly(rect, -nx, -ny, -d);
+      var refl = folded.map(function (q) { var k = 2 * (q[0] * nx + q[1] * ny - d); return [q[0] - k * nx, q[1] - k * ny]; });
+      refl = clipPoly(clipPoly(refl, 0, 1, 0), 0, -1, -H);
+      setPoly(front, flat, X0); setPoly(under, folded, X0); setPoly(flap, refl, X0);
+      // El reverso (hoja izquierda nueva) = espejo ∘ reflexión sobre el doblez = una transformación afín
+      var m = [-(1 - 2 * nx * nx), 2 * nx * ny, -2 * nx * ny, 1 - 2 * ny * ny, W * (1 - 2 * nx * nx) + 2 * d * nx + X0, -2 * W * nx * ny + 2 * d * ny];
+      lp.style.transform = 'matrix(' + m.map(function (v) { return v.toFixed(5); }).join(',') + ')';
+      // Sombras a lo largo del doblez
+      var deg = Math.atan2(ny, nx) * 180 / Math.PI;
+      strip(fS, px + X0, py, deg);
+      strip(uS, px + X0, py, deg + 180);
+      strip(lS, px + X0, py, deg + 180);
+    }
+    return { el: el, draw: draw };
+  }
+
+  function runCurl(curl, forward, duration) {
+    return new Promise(function (resolve) {
+      var t0 = null, done = false;
+      function end() { if (!done) { done = true; resolve(); } }
+      function ease(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+      function frame(ts) {
+        if (done) return;
+        if (t0 === null) t0 = ts;
+        var t = Math.min(1, (ts - t0) / duration);
+        var e = ease(t);
+        curl.draw(forward ? e : 1 - e);
+        if (t < 1) requestAnimationFrame(frame); else end();
+      }
+      curl.draw(forward ? 0 : 1);
+      requestAnimationFrame(frame);
+      setTimeout(end, duration + 1500); // red de seguridad (pestaña en segundo plano)
+    });
   }
 
   function finish(url, doc, push) {
@@ -174,90 +237,34 @@
       return;
     }
 
-    var twoPages = true; // también en móvil: el libro siempre es una doble página (solo se ve una hoja)
     var h0 = spread.offsetHeight;
     var oldRightHTML = inner(right()).innerHTML;
     var oldLeftHTML = inner(left()).innerHTML;
+    var fwd = dir > 0, frontHTML, flapHTML, H;
 
-    // Móvil: solo se ve una hoja, así que la hoja que se pasa cruza la pantalla de derecha a izquierda
-    // (se levanta por el borde libre y se desliza fuera por la izquierda; hacia atrás, vuelve de izquierda a derecha)
-    if (phone.matches) {
-      var fwd = dir > 0;
+    if (fwd) {
+      // Hacia delante: la hoja derecha se levanta por la esquina y deja ver la nueva debajo
       fill(right(), newRight);
-      var Hs = Math.max(h0, spread.offsetHeight);
-      if (!fwd) inner(right()).innerHTML = oldRightHTML; // la hoja actual sigue debajo hasta que la otra la cubre
-      spread.style.minHeight = Hs + 'px';
-      var sweepLeaf = makeLeaf(fwd ? oldRightHTML : newRight.innerHTML, '', Hs);
-      spread.appendChild(sweepLeaf);
-      var so = { duration: 760, easing: 'cubic-bezier(.45,.05,.25,1)', fill: 'forwards', direction: fwd ? 'normal' : 'reverse' };
-      var sweep = [
-        sweepLeaf.animate([
-          { transform: 'translateZ(1px) translateX(0) rotateY(0deg)', offset: 0 },
-          { transform: 'translateZ(1px) translateX(-30%) rotateY(-32deg)', offset: 0.42 },
-          { transform: 'translateZ(1px) translateX(-114%) rotateY(-16deg)', offset: 1 }
-        ], so),
-        sweepLeaf.querySelector('.face--front .shade').animate([{ opacity: 0 }, { opacity: 0.45 }], so)
-      ];
-      try { await Promise.all(sweep.map(function (x) { return x.finished; })); } catch (err) { /* cancelada */ }
-      if (!fwd) fill(right(), newRight);
-      fill(left(), newLeft);
-      sweepLeaf.remove();
-      spread.style.minHeight = '';
-      finish(url, doc, push);
-      return;
-    }
-
-    var leaf, front, back, turn, finalStep;
-
-    if (dir > 0 || !twoPages) {
-      // Hacia delante: la hoja de la derecha se vuelve sobre la izquierda
-      fill(right(), newRight);
-      if (!twoPages) fill(left(), newLeft);
-      var h1 = spread.offsetHeight;
-      var H = Math.max(h0, h1);
-      spread.style.minHeight = H + 'px';
-      leaf = makeLeaf(oldRightHTML, twoPages ? newLeft.innerHTML : '', H);
-      spread.appendChild(leaf);
-      turn = twoPages ? [0, -180] : [0, -100];
-      finalStep = function () { if (twoPages) fill(left(), newLeft); };
+      H = Math.max(h0, spread.offsetHeight);
+      frontHTML = oldRightHTML;
+      flapHTML = newLeft.innerHTML;
     } else {
-      // Hacia atrás: la hoja vuelve de la izquierda a la derecha
+      // Hacia atrás: la hoja anterior vuelve desde la izquierda y cubre la actual
       fill(left(), newLeft);
-      var h2 = spread.offsetHeight;
-      var Hb = Math.max(h0, h2);
-      spread.style.minHeight = Hb + 'px';
-      leaf = makeLeaf(newRight.innerHTML, oldLeftHTML, Hb);
-      spread.appendChild(leaf);
-      turn = [-180, 0];
-      finalStep = function () { fill(right(), newRight); };
+      fill(right(), newRight);                       // solo para medir la altura de la página a la que se vuelve
+      H = Math.max(h0, spread.offsetHeight);
+      inner(right()).innerHTML = oldRightHTML;       // la hoja actual sigue debajo hasta que la otra la cubre
+      frontHTML = newRight.innerHTML;
+      flapHTML = oldLeftHTML;
     }
+    spread.style.minHeight = H + 'px';
 
-    front = leaf.querySelector('.face--front .shade');
-    back = leaf.querySelector('.face--back .shade');
-    var opts = { duration: DURATION, easing: EASE, fill: 'forwards' };
-    var forward = turn[0] === 0;
-    var anims = [
-      leaf.animate([
-        { transform: 'translateZ(1px) rotateY(' + turn[0] + 'deg)' },
-        { transform: 'translateZ(1px) rotateY(' + turn[1] + 'deg)' }
-      ], opts)
-    ];
-    if (!twoPages) {
-      anims.push(leaf.animate([{ opacity: 1 }, { opacity: 1, offset: .6 }, { opacity: 0 }], opts));
-    }
-    anims.push(front.animate(forward
-      ? [{ opacity: 0 }, { opacity: .55, offset: .5 }, { opacity: .55 }]
-      : [{ opacity: .55 }, { opacity: .55, offset: .5 }, { opacity: 0 }], opts));
-    anims.push(back.animate(forward
-      ? [{ opacity: .55 }, { opacity: .55, offset: .5 }, { opacity: 0 }]
-      : [{ opacity: 0 }, { opacity: .55, offset: .5 }, { opacity: .55 }], opts));
+    var curl = makeCurl(frontHTML, flapHTML, right().offsetWidth, H, right().offsetLeft);
+    spread.appendChild(curl.el);
+    await runCurl(curl, fwd, phone.matches ? 1000 : 1150);
 
-    try {
-      await Promise.all(anims.map(function (a) { return a.finished; }));
-    } catch (err) { /* animación cancelada: seguimos igualmente */ }
-
-    finalStep();
-    leaf.remove();
+    if (fwd) fill(left(), newLeft); else fill(right(), newRight);
+    curl.el.remove();
     spread.style.minHeight = '';
     finish(url, doc, push);
   }

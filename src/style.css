@@ -275,22 +275,16 @@ html.js .js-only { display: flex; }
 .folio-num { font-variant-numeric: oldstyle-nums; letter-spacing: .1em; }
 .mobile-footer { display: none; }
 
-/* ---------- Hoja que se pasa ---------- */
+/* ---------- Hoja que se pasa: la esquina superior derecha se levanta ---------- */
 
-.leaf {
-  position: absolute; top: 0; left: 50%; width: 50%; z-index: 30;
-  transform-origin: left center; transform-style: preserve-3d; pointer-events: none; will-change: transform;
-}
-.face {
-  position: absolute; inset: 0; overflow: hidden;
-  backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  box-shadow: 0 0 40px #0000004d;
-}
-.face--back { transform: rotateY(180deg); }
-.shade { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0; }
-.face--front .shade { background: linear-gradient(90deg, #0000, #0d184099); }
-.face--back .shade { background: linear-gradient(90deg, #0000, #0d184088); }
-.face .page-inner { animation: none; }
+.curl { position: absolute; inset: 0; z-index: 30; overflow: hidden; pointer-events: none; }
+.curl-layer { position: absolute; inset: 0; visibility: hidden; }
+.curl-page { position: absolute; top: 0; overflow: hidden; }
+.curl-page .page-inner { animation: none; }
+.curl-strip { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 90px; }
+.curl-under .curl-strip { background: linear-gradient(90deg, #0a1440b0, #0a144000); }
+.curl-front .curl-strip { width: 70px; background: linear-gradient(90deg, #0a144070, #0a144000); }
+.curl-flap .curl-strip { width: 120px; background: linear-gradient(90deg, #0a144060, #ffffff4d 38%, #0a14400f); }
 
 /* ---------- Pantallas anchas / estrechas ---------- */
 
