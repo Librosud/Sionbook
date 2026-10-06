@@ -97,13 +97,6 @@ function soonCard(b) {
   return `<li class="card card--soon">${cover(b, { decorative: true })}<p class="card-cat">Próximamente${b.when ? ' · ' + esc(b.when) : ''}</p><h3 class="card-title">${esc(b.title)}</h3>${b.subtitle ? `<p class="card-sub">${esc(b.subtitle)}</p>` : ''}${b.note ? `<p class="card-note">${esc(b.note)}</p>` : ''}<p class="card-author">${esc(b.author)}</p></li>`;
 }
 
-// Sección "Próximas obras": solo aparece si data/proximas.json tiene títulos
-const upcomingBlock = () => upcoming.length
-  ? `${rule}
-<section aria-labelledby="proximas"><h2 id="proximas">Próximas obras</h2>
-<ul class="grid">${upcoming.map(soonCard).join('')}</ul></section>`
-  : '';
-
 /* ---------- página izquierda (índice) y derecha (contenido) ---------- */
 
 function leftPage(current, extra) {
@@ -209,7 +202,6 @@ ${rule}
 <h2>Novedades</h2>
 <ul class="grid">${books.slice(0, 3).map((b) => card(b)).join('')}</ul>
 <p><a class="link-arrow" href="/catalogo/">Ver todo el catálogo →</a></p>
-${upcomingBlock()}
 ${rule}
 <h2>Cómo comprar</h2>
 <ul class="formats">
