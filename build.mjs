@@ -22,7 +22,7 @@ const paragraphs = (s = '') => s.split(/\n\s*\n/).map((p) => p.trim()).filter(Bo
 const jsonLd = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 const abs = (p) => (/^https?:/.test(p) ? p : site.url + p);
 const langCode = (l = '') => ({ 'español': 'es', 'portugués': 'pt', 'português': 'pt', 'english': 'en', 'inglés': 'en' }[l.toLowerCase()] || site.lang);
-const colorOf = (b) => (/^#[0-9a-f]{3,8}$/i.test(b.color || '') ? b.color : '#6b1d2a');
+const colorOf = (b) => (/^#[0-9a-f]{3,8}$/i.test(b.color || '') ? b.color : '#0a2a8a');
 
 function out(rel, content) {
   const file = path.join(dist, rel);
@@ -66,7 +66,7 @@ const folioOf = (p) => pages.findIndex((x) => x.path === p);
 
 /* ---------- piezas visuales ---------- */
 
-const logo = `<svg viewBox="0 0 64 44" fill="none" aria-hidden="true"><path d="M32 8C24 3 12 3 4 6v32c8-3 20-3 28 2z" fill="#7d2631" stroke="#b48a3c" stroke-width="1.6" stroke-linejoin="round"/><path d="M32 8c8-5 20-5 28-2v32c-8-3-20-3-28 2z" fill="#93303d" stroke="#b48a3c" stroke-width="1.6" stroke-linejoin="round"/><path d="M32 8v32" stroke="#b48a3c" stroke-width="1.6"/></svg>`;
+const logo = `<img src="/brand/logo.png" alt="Sion Book" width="838" height="402">`;
 const coverMark = `<svg class="cover-mark" viewBox="0 0 64 44" fill="none" aria-hidden="true"><path d="M32 8C24 3 12 3 4 6v32c8-3 20-3 28 2zM32 8c8-5 20-5 28-2v32c-8-3-20-3-28 2zM32 8v32" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>`;
 const ornament = `<svg class="ornament" viewBox="0 0 200 120" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M100 14l16 46-16 46-16-46z"/><path d="M100 30l8 30-8 30-8-30z" fill="currentColor" opacity=".25"/><path d="M84 60C60 60 50 40 28 40M84 60C60 60 50 80 28 80M116 60c24 0 34-20 56-20M116 60c24 0 34 20 56 20"/><circle cx="22" cy="40" r="3"/><circle cx="22" cy="80" r="3"/><circle cx="178" cy="40" r="3"/><circle cx="178" cy="80" r="3"/></svg>`;
 const rule = `<span class="rule" aria-hidden="true"><i></i></span>`;
@@ -101,7 +101,7 @@ function leftPage(current, extra) {
       : '';
     return `<li><a href="${it.path}"${aria}><span class="toc-num" aria-hidden="true">${it.num}</span><span class="toc-title">${it.label}</span><span class="toc-dots" aria-hidden="true"></span><span class="toc-page" aria-hidden="true">${folioOf(it.path) + 1}</span></a>${kids}</li>`;
   }).join('');
-  return `<header><a class="brand" href="/"${current === '/' ? ' aria-current="page"' : ''}>${logo}<span class="brand-name">Sion <em>Book</em></span><span class="brand-sub">Editorial</span></a></header>
+  return `<header><a class="brand" href="/"${current === '/' ? ' aria-current="page"' : ''}>${logo}<span class="brand-sub">Editorial</span></a></header>
 <nav aria-label="Índice del libro"><p class="toc-label" aria-hidden="true">Índice</p><ol class="toc">${li}</ol></nav>
 <div class="left-extra">${extra}</div>
 <footer class="left-footer"><p>© ${year} Sion Book · ${esc(site.editorTitle)}: ${esc(site.editor)}</p><p>Los botones de compra te llevan a tiendas externas (Amazon y Google Play Libros).</p></footer>`;
@@ -139,7 +139,7 @@ function document_({ path: p, order, page, title, description, left, right, og =
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${canonical}">
-<meta name="theme-color" content="#3a1218">
+<meta name="theme-color" content="#0a1f6b">
 <meta property="og:site_name" content="${esc(site.name)}">
 <meta property="og:locale" content="${site.locale}">
 <meta property="og:type" content="${og.type || 'website'}">
@@ -318,7 +318,7 @@ out('404.html', document_({
 
 /* ---------- archivos de apoyo ---------- */
 
-out('favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#4a1b23"/><path d="M32 22c-6-4-14-4-20-2v24c6-2 14-2 20 2z" fill="#7d2631" stroke="#d9bd7e" stroke-width="2" stroke-linejoin="round"/><path d="M32 22c6-4 14-4 20-2v24c-6-2-14-2-20 2z" fill="#93303d" stroke="#d9bd7e" stroke-width="2" stroke-linejoin="round"/></svg>`);
+out('favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#fff"/><path d="M14 8h18v40l-18-7z" fill="#00b4ff"/><path d="M32 8h18v33l-18 7z" fill="#0a2cff"/></svg>`);
 
 out('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${site.url}/sitemap.xml\n`);
 
@@ -326,6 +326,10 @@ const lastmod = today.toISOString().slice(0, 10);
 out('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map((p) => `  <url><loc>${site.url}${p.path}</loc><lastmod>${lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);
 
 out('_headers', `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n`);
+
+// Logo de la marca (assets/brand → dist/brand)
+const brandDir = path.join(root, 'assets/brand');
+if (fs.existsSync(brandDir)) for (const f of fs.readdirSync(brandDir)) out(`brand/${f}`, fs.readFileSync(path.join(brandDir, f)));
 
 // Portadas propias (assets/covers → dist/covers)
 const coversDir = path.join(root, 'assets/covers');

@@ -1,17 +1,17 @@
 /* Sion Book — un libro abierto sobre una web moderna */
 
 :root {
-  --desk: #17110e;
-  --leather: #4a1b23;
-  --leather-2: #2f0f15;
-  --gold: #b48a3c;
-  --gold-soft: #d9bd7e;
-  --paper: #f7f0e0;
-  --ink: #2b2218;
-  --muted: #6f6150;
-  --accent: #7d2631;
-  --accent-2: #5c1a23;
-  --rule: #d8cbb0;
+  --desk: #060b1f;
+  --leather: #0a1f6b;
+  --leather-2: #050f3a;
+  --gold: #00a3e0;
+  --gold-soft: #7fd8ff;
+  --paper: #f6f8fd;
+  --ink: #262a35;
+  --muted: #596177;
+  --accent: #0a3df0;
+  --accent-2: #001fb5;
+  --rule: #cfd8ec;
   --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, "URW Palladio L", Georgia, "Times New Roman", serif;
   color-scheme: light;
 }
@@ -26,7 +26,7 @@ body {
   line-height: 1.65;
   color: var(--ink);
   background:
-    radial-gradient(1200px 700px at 50% -10%, #2f2019 0%, transparent 70%),
+    radial-gradient(1200px 700px at 50% -10%, #0f1a45 0%, transparent 70%),
     var(--desk);
 }
 
@@ -48,11 +48,11 @@ main:focus { outline: none; }
   position: relative;
   padding: clamp(8px, 1.2vw, 16px);
   border-radius: 14px;
-  background: linear-gradient(160deg, #5c2430 0%, var(--leather) 45%, var(--leather-2) 100%);
-  box-shadow: 0 50px 90px -30px #000c, 0 18px 30px -12px #0008, inset 0 0 0 1px #e9c98a22, inset 0 2px 0 #ffffff14;
+  background: linear-gradient(160deg, #1a36a8 0%, var(--leather) 45%, var(--leather-2) 100%);
+  box-shadow: 0 50px 90px -30px #000c, 0 18px 30px -12px #0008, inset 0 0 0 1px #7fd8ff22, inset 0 2px 0 #ffffff14;
 }
 .book::before {
-  content: ""; position: absolute; inset: 5px; border: 1px solid #c9a35a55; border-radius: 10px; pointer-events: none;
+  content: ""; position: absolute; inset: 5px; border: 1px solid #4fc3ff55; border-radius: 10px; pointer-events: none;
 }
 
 .spread {
@@ -62,14 +62,14 @@ main:focus { outline: none; }
   min-height: 70vh;
   perspective: 2800px;
   border-radius: 4px;
-  box-shadow: 0 2px 0 #e8dcc0, 0 4px 0 #d3c5a6, 0 6px 0 #bfb08f;
+  box-shadow: 0 2px 0 #dfe5f3, 0 4px 0 #c9d2e8, 0 6px 0 #b3bfdc;
 }
 
 /* Papel */
 .paper {
   position: relative;
   background:
-    linear-gradient(180deg, #fffaf0 0, transparent 120px),
+    linear-gradient(180deg, #ffffff 0, transparent 120px),
     repeating-linear-gradient(0deg, #0000 0 29px, #00000005 29px 30px),
     var(--paper);
 }
@@ -81,13 +81,13 @@ main:focus { outline: none; }
 .paper--left::after, .paper--right::before {
   content: ""; position: absolute; top: 0; bottom: 0; width: clamp(28px, 4vw, 64px); pointer-events: none; z-index: 1;
 }
-.paper--left::after { right: 0; background: linear-gradient(90deg, transparent, #3b2a1233 70%, #2b1c0f55); }
-.paper--right::before { left: 0; background: linear-gradient(270deg, transparent, #3b2a1226 70%, #2b1c0f4d); }
+.paper--left::after { right: 0; background: linear-gradient(90deg, transparent, #1a265033 70%, #0d184055); }
+.paper--right::before { left: 0; background: linear-gradient(270deg, transparent, #1a265026 70%, #0d18404d); }
 
 /* Marcapáginas */
 .paper--right > .page-inner::before {
   content: ""; position: absolute; top: 0; right: clamp(18px, 4vw, 48px); width: 22px; height: 64px;
-  background: linear-gradient(180deg, #8d2b38, #6a1d28);
+  background: linear-gradient(180deg, #00c8ff, #0030ff);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
 }
 
@@ -105,12 +105,12 @@ main:focus { outline: none; }
 
 /* ---------- Tipografía ---------- */
 
-h1, h2, h3 { font-weight: 600; line-height: 1.15; margin: 0 0 .5em; color: #241a12; }
+h1, h2, h3 { font-weight: 600; line-height: 1.15; margin: 0 0 .5em; color: #1b2030; }
 h1 { font-size: clamp(2rem, 4.2vw, 3.1rem); }
 h2 { font-size: clamp(1.35rem, 2.2vw, 1.7rem); }
 h3 { font-size: 1.1rem; }
 p { margin: 0 0 1em; }
-.lead { font-size: 1.2rem; color: #41352a; }
+.lead { font-size: 1.2rem; color: #3a4155; }
 .eyebrow { font-variant: small-caps; letter-spacing: .14em; color: var(--accent); font-size: .98rem; margin: 0 0 .6rem; }
 .subtitle { font-style: italic; color: var(--muted); font-size: 1.2rem; margin: -.2rem 0 .6rem; }
 .byline { color: var(--muted); margin-bottom: 1.2rem; }
@@ -128,16 +128,14 @@ p { margin: 0 0 1em; }
 
 .brand { display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; text-decoration: none; color: var(--ink); }
 .brand:hover { color: var(--ink); }
-.brand svg { width: 46px; height: auto; margin-bottom: .5rem; }
-.brand-name { font-size: clamp(1.9rem, 3vw, 2.6rem); line-height: 1; font-weight: 600; }
-.brand-name em { font-style: italic; color: var(--accent); font-weight: 500; }
+.brand img { width: clamp(150px, 18vw, 210px); height: auto; display: block; }
 .brand-sub { font-variant: small-caps; letter-spacing: .3em; color: var(--muted); font-size: .85rem; }
 
 .toc-label { font-variant: small-caps; letter-spacing: .2em; color: var(--muted); font-size: .9rem; margin: 0 0 .4rem; border-bottom: 1px solid var(--rule); padding-bottom: .4rem; }
 .toc { list-style: none; margin: 0; padding: 0; }
 .toc a { display: flex; align-items: baseline; gap: .6rem; padding: .36rem 0; text-decoration: none; color: var(--ink); }
 .toc-num { width: 2.2em; color: var(--gold); font-variant: small-caps; font-size: .95rem; }
-.toc-dots { flex: 1; border-bottom: 1px dotted #8c7b5f; transform: translateY(-.25em); min-width: 1rem; }
+.toc-dots { flex: 1; border-bottom: 1px dotted #8a96b5; transform: translateY(-.25em); min-width: 1rem; }
 .toc-page { font-variant-numeric: oldstyle-nums; color: var(--muted); }
 .toc a:hover .toc-title { color: var(--accent); }
 .toc [aria-current="page"] .toc-title { color: var(--accent); font-style: italic; }
@@ -156,9 +154,9 @@ p { margin: 0 0 1em; }
 /* ---------- Portadas ---------- */
 
 .cover {
-  --c: #6b1d2a;
+  --c: #0a2a8a;
   position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; container-type: inline-size;
-  border-radius: 3px 6px 6px 3px; color: #f7ecd2;
+  border-radius: 3px 6px 6px 3px; color: #f2f7ff;
   background: var(--c);
   background: linear-gradient(135deg, color-mix(in srgb, var(--c) 82%, #fff) 0, var(--c) 45%, color-mix(in srgb, var(--c) 70%, #000) 100%);
   box-shadow: 0 14px 24px -10px #000a, 0 2px 4px #0005, inset 0 0 0 1px #ffffff1c;
@@ -166,13 +164,13 @@ p { margin: 0 0 1em; }
 .cover::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 7%; background: linear-gradient(90deg, #0005, #fff2 60%, #0000); z-index: 2; }
 .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cover-frame {
-  position: absolute; inset: 6%; border: 1px solid #e3c88a88; display: flex; flex-direction: column;
+  position: absolute; inset: 6%; border: 1px solid #bfe9ff88; display: flex; flex-direction: column;
   justify-content: space-between; align-items: center; text-align: center; padding: 12% 8% 9%;
 }
 .cover-title { font-size: 9.5cqw; line-height: 1.1; font-weight: 600; }
 .cover-sub { font-size: 5cqw; font-style: italic; opacity: .9; margin-top: 4%; }
 .cover-author { font-size: 5cqw; letter-spacing: .16em; text-transform: uppercase; }
-.cover-mark { width: 12cqw; color: #e3c88a; }
+.cover-mark { width: 12cqw; color: #bfe9ff; }
 
 /* ---------- Tarjetas y rejilla ---------- */
 
@@ -180,7 +178,7 @@ p { margin: 0 0 1em; }
 .js-only { display: none; }
 html.js .js-only { display: flex; }
 .chip {
-  font: inherit; font-size: .95rem; padding: .3rem .85rem; border: 1px solid var(--rule); background: #fffaf0;
+  font: inherit; font-size: .95rem; padding: .3rem .85rem; border: 1px solid var(--rule); background: #ffffff;
   border-radius: 999px; color: var(--ink); cursor: pointer;
 }
 .chip:hover { border-color: var(--accent); }
@@ -198,7 +196,7 @@ html.js .js-only { display: flex; }
 .card-author { color: var(--muted); font-size: .92rem; margin: 0; }
 
 .formats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; list-style: none; padding: 0; margin: 0 0 1rem; }
-.formats li { padding: 1rem; border: 1px solid var(--rule); border-radius: 4px; background: #fffaf066; }
+.formats li { padding: 1rem; border: 1px solid var(--rule); border-radius: 4px; background: #ffffff88; }
 .formats p { margin: 0; font-size: .95rem; color: var(--muted); }
 
 /* ---------- Ficha de libro ---------- */
@@ -211,15 +209,15 @@ html.js .js-only { display: flex; }
 .buy { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .8rem; margin: 1rem 0 .6rem; }
 .btn {
   position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: .05rem;
-  padding: .7rem 2.6rem .7rem 1.1rem; border-radius: 4px; text-decoration: none; color: #fbf3df;
-  background: linear-gradient(180deg, var(--accent), var(--accent-2)); border: 1px solid #4d1119;
+  padding: .7rem 2.6rem .7rem 1.1rem; border-radius: 4px; text-decoration: none; color: #ffffff;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2)); border: 1px solid #001a8a;
   box-shadow: 0 1px 0 #fff3 inset, 0 6px 14px -8px #000a; transition: transform .2s ease, box-shadow .2s ease;
 }
 .btn::after { content: "\2197"; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
 .btn:hover { transform: translateY(-2px); color: #fff; box-shadow: 0 1px 0 #fff3 inset, 0 10px 18px -8px #000b; }
 .btn-kicker { font-size: .76rem; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
 .btn-label { font-size: 1.12rem; font-weight: 600; }
-.btn.is-disabled { background: #e8dec6; color: #7a6c57; border-color: #d1c4a6; box-shadow: none; cursor: default; }
+.btn.is-disabled { background: #e3e8f4; color: #6b7488; border-color: #c8d1e6; box-shadow: none; cursor: default; }
 .btn.is-disabled::after { content: ""; }
 .fineprint { font-size: .88rem; color: var(--muted); }
 
@@ -251,8 +249,8 @@ html.js .js-only { display: flex; }
 }
 .face--back { transform: rotateY(180deg); }
 .shade { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0; }
-.face--front .shade { background: linear-gradient(90deg, #0000, #2a1a0a99); }
-.face--back .shade { background: linear-gradient(90deg, #0000, #2a1a0a88); }
+.face--front .shade { background: linear-gradient(90deg, #0000, #0d184099); }
+.face--back .shade { background: linear-gradient(90deg, #0000, #0d184088); }
 .face .page-inner { animation: none; }
 
 /* ---------- Pantallas anchas / estrechas ---------- */
@@ -274,8 +272,7 @@ html.js .js-only { display: flex; }
   .page-inner, .paper--right .page-inner, .paper--left .page-inner { padding: 20px 20px 26px; }
   .paper--left .page-inner { gap: .9rem; padding-bottom: 10px; }
   .brand { flex-direction: row; align-items: center; gap: .7rem; flex-wrap: wrap; }
-  .brand svg { width: 34px; margin: 0; }
-  .brand-name { font-size: 1.7rem; }
+  .brand img { width: 120px; }
   .toc-label, .toc-num, .toc-dots, .toc-page, .toc--sub, .left-extra, .left-footer { display: none; }
   .toc { display: flex; flex-wrap: wrap; gap: .1rem 1.2rem; }
   .toc a { padding: .25rem 0; }
