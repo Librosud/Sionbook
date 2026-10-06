@@ -139,6 +139,19 @@ p { margin: 0 0 1em; }
 
 /* ---------- Página izquierda: índice ---------- */
 
+/* Cabecera de la hoja izquierda: marca + selector de idioma */
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.lang {
+  display: inline-flex; flex: none; margin-top: .35rem; padding: 3px; gap: 2px;
+  border: 1px solid var(--rule); border-radius: 999px; background: #ffffffcc;
+  box-shadow: 0 1px 0 #fff inset, 0 6px 14px -10px #0a1f6b99;
+  font-size: .78rem; letter-spacing: .14em; line-height: 1; font-variant: normal;
+}
+.lang a, .lang .lang-on { display: block; padding: .42rem .8rem .42rem .9rem; border-radius: 999px; text-decoration: none; }
+.lang a { color: var(--muted); transition: color .2s ease, background .2s ease; }
+.lang a:hover { color: var(--accent); background: #0a3df01a; }
+.lang .lang-on { color: #fff; background: linear-gradient(180deg, var(--accent), var(--accent-2)); box-shadow: 0 1px 0 #fff3 inset; }
+
 .brand { display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; text-decoration: none; color: var(--ink); }
 .brand:hover { color: var(--ink); }
 .brand img { width: clamp(150px, 18vw, 210px); height: auto; display: block; }
@@ -330,6 +343,7 @@ html.js .js-only { display: flex; }
   .paper--left::after, .paper--right::before { display: none; }
   .page-inner, .paper--right .page-inner, .paper--left .page-inner { padding: 20px 20px 26px; }
   .paper--left .page-inner { gap: .9rem; padding-bottom: 10px; }
+  .head { align-items: center; }
   .brand { flex-direction: row; align-items: center; gap: .7rem; flex-wrap: wrap; }
   .brand img { width: 120px; }
   .toc-label, .toc-num, .toc-dots, .toc-page, .toc--sub, .left-extra, .left-footer { display: none; }
