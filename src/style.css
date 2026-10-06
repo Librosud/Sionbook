@@ -42,7 +42,7 @@ main:focus { outline: none; }
 
 /* ---------- El libro ---------- */
 
-.wrap { max-width: 1280px; margin: 0 auto; padding: clamp(10px, 2.4vw, 36px); }
+.wrap { max-width: 1800px; margin: 0 auto; padding: clamp(8px, 1.4vw, 24px); }
 
 .book {
   position: relative;
