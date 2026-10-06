@@ -91,7 +91,7 @@ function card(b, withCategory = false) {
 }
 
 function soonCard(b) {
-  return `<li class="card card--soon">${cover(b, { decorative: true })}<p class="card-cat">Próximamente${b.when ? ' · ' + esc(b.when) : ''}</p><h3 class="card-title">${esc(b.title)}</h3>${b.subtitle ? `<p class="card-sub">${esc(b.subtitle)}</p>` : ''}<p class="card-author">${esc(b.author)}</p></li>`;
+  return `<li class="card card--soon">${cover(b, { decorative: true })}<p class="card-cat">Próximamente${b.when ? ' · ' + esc(b.when) : ''}</p><h3 class="card-title">${esc(b.title)}</h3>${b.subtitle ? `<p class="card-sub">${esc(b.subtitle)}</p>` : ''}${b.note ? `<p class="card-note">${esc(b.note)}</p>` : ''}<p class="card-author">${esc(b.author)}</p></li>`;
 }
 
 // Sección "Próximas obras": solo aparece si data/proximas.json tiene títulos
