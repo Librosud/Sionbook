@@ -233,8 +233,7 @@ out('catalogo/index.html', document_({
 <h1>Catálogo</h1>
 <p class="lead">Todos nuestros libros, con enlace directo a Amazon y Google Play Libros.</p>
 ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="group" aria-label="Filtrar por categoría"><button type="button" class="chip" data-filter="all" aria-pressed="true">Todos</button>${categories.map((c) => `<button type="button" class="chip" data-filter="${esc(c)}" aria-pressed="false">${esc(c)}</button>`).join('')}</div>` : ''}
-<ul class="grid">${books.map((b) => card(b, true)).join('')}</ul>
-${upcomingBlock()}`),
+<ul class="grid">${books.map((b) => card(b, true)).join('')}</ul>`),
   ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Catálogo', url: abs('/catalogo/'), isPartOf: { '@type': 'WebSite', name: site.name, url: site.url } }]
 }));
 
