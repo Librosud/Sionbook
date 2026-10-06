@@ -43,7 +43,7 @@ const T = {
     upcDesc: (list) => `Próximas obras de ${site.name}: ${list}.`, seeCatalog: 'Ver el catálogo →', exploreCat: 'Explora el catálogo →',
     aboutTitle: 'La editorial', aboutDesc: `Conoce ${site.name}, editorial independiente de libros en español y portugués dirigida por ${site.editor}.`,
     contactTitle: 'Contacto', contactDesc: `Escribe a ${site.name} para consultas sobre libros, prensa, distribución o colaboraciones.`, writeTo: 'Escríbenos a',
-    langAria: 'Idioma de la web', switchTo: 'Leer en portugués',
+    langAria: 'Idioma de la web', switchTo: 'Leer en portugués', openToc: 'Abrir el índice del libro',
     languages: { 'español': 'Español', 'portugués': 'Portugués', 'português': 'Portugués', 'english': 'Inglés', 'inglés': 'Inglés' }
   },
   pt: {
@@ -66,7 +66,7 @@ const T = {
     upcDesc: (list) => `Próximas obras da ${site.name}: ${list}.`, seeCatalog: 'Ver o catálogo →', exploreCat: 'Explore o catálogo →',
     aboutTitle: 'A editora', aboutDesc: `Conheça a ${site.name}, editora independente de livros em espanhol e português dirigida por ${site.editor}.`,
     contactTitle: 'Contato', contactDesc: `Escreva para a ${site.name} para consultas sobre livros, imprensa, distribuição ou colaborações.`, writeTo: 'Escreva para',
-    langAria: 'Idioma do site', switchTo: 'Ler em espanhol',
+    langAria: 'Idioma do site', switchTo: 'Ler em espanhol', openToc: 'Abrir o índice do livro',
     languages: { 'español': 'Espanhol', 'portugués': 'Português', 'português': 'Português', 'english': 'Inglês', 'inglés': 'Inglês' }
   }
 };
@@ -177,14 +177,14 @@ ${ld.map(jsonLd).join('\n')}
 </head>
 <body data-page="${page}" data-order="${order}">
 <a class="skip" href="#page-right">${T[lang].skip}</a>
-<div class="wrap"><div class="book"><div class="spread" id="spread">
+<div class="wrap"><div class="book"><div class="clip"><div class="spread" id="spread">
 <div class="paper paper--left" id="page-left"><div class="page-inner">
 ${left}
 </div></div>
 <main class="paper paper--right" id="page-right" tabindex="-1"><div class="page-inner">
 ${right}
 </div></main>
-</div></div></div>
+</div></div></div></div>
 <div class="sr-only" id="announcer" aria-live="polite"></div>
 </body>
 </html>
@@ -275,7 +275,7 @@ function buildLang(lang) {
 <footer class="left-footer"><p>© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}</p><p>${t.leftFoot}</p></footer>`;
   }
 
-  function rightPage(current, content) {
+  function rightPage(current, content, key) {
     const i = folioOf(current);
     let folio = '';
     if (i >= 0) {
@@ -283,7 +283,8 @@ function buildLang(lang) {
       const next = pages[i + 1];
       folio = `<nav class="folio" aria-label="${t.turnAria}">${prev ? `<a class="prev" rel="prev" href="${prev.path}">← ${esc(prev.title)}</a>` : '<span></span>'}<span class="folio-num" aria-hidden="true">— ${i + 1} —</span>${next ? `<a class="next" rel="next" href="${next.path}">${esc(next.title)} →</a>` : '<span></span>'}</nav>`;
     }
-    return `<div class="content">${content}</div>${folio}<p class="mobile-footer">© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}. ${t.mobileFoot}</p>`;
+    const ribbon = `<button type="button" class="ribbon-btn" aria-label="${t.openToc}" aria-expanded="false" aria-controls="page-left"></button>`;
+    return `${ribbon}${key ? langSwitch(key).replace('class="lang"', 'class="lang lang--mini"') : ''}<div class="content">${content}</div>${folio}<p class="mobile-footer">© ${year} Sion Book · ${esc(s.editorTitle)}: ${esc(site.editor)}. ${t.mobileFoot}</p>`;
   }
 
   const defaultExtra = `<div style="text-align:center">${ornament}<p class="left-quote">${esc(s.tagline)}</p></div>`;
@@ -311,7 +312,7 @@ ${rule}
 <li><h3>${t.fKindle[0]}</h3><p>${t.fKindle[1]}</p></li>
 <li><h3>${t.fPlay[0]}</h3><p>${t.fPlay[1]}</p></li>
 </ul>
-<p class="fineprint">${t.fine}</p>`),
+<p class="fineprint">${t.fine}</p>`, 'home'),
     ld: [orgLd, siteLd]
   }));
 
@@ -327,7 +328,7 @@ ${rule}
 <h1>${t.catalog}</h1>
 <p class="lead">${t.catLead}</p>
 ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="group" aria-label="${t.filterAria}"><button type="button" class="chip" data-filter="all" aria-pressed="true">${t.all}</button>${categories.map((c) => `<button type="button" class="chip" data-filter="${esc(c)}" aria-pressed="false">${esc(c)}</button>`).join('')}</div>` : ''}
-<ul class="grid">${bk.map((b) => card(b, true)).join('')}</ul>`),
+<ul class="grid">${bk.map((b) => card(b, true)).join('')}</ul>`, 'catalog'),
     ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: t.catalog, url: abs(r.catalog), isPartOf: { '@type': 'WebSite', name: site.name, url: site.url } }]
   }));
 
@@ -375,7 +376,7 @@ ${sub ? `<p class="subtitle">${esc(sub)}</p>` : ''}
 <p class="fineprint">${t.buyFine}</p>
 ${rule}
 <div class="prose" lang="${descLang}">${paragraphs(descRaw)}</div>
-<dl class="meta">${meta}</dl>`),
+<dl class="meta">${meta}</dl>`, key),
       ld: [
         {
           '@context': 'https://schema.org', '@type': 'Book', name: bt, alternativeHeadline: sub || undefined,
@@ -407,7 +408,7 @@ ${rule}
 <h1>${t.upcoming}</h1>
 <p class="lead">${t.upcLead}</p>
 <ul class="grid">${up.map(soonCard).join('')}</ul>
-<p><a class="link-arrow" href="${r.catalog}">${t.seeCatalog}</a></p>`)
+<p><a class="link-arrow" href="${r.catalog}">${t.seeCatalog}</a></p>`, 'upcoming')
   }));
 
   // La editorial
@@ -422,7 +423,7 @@ ${rule}
 ${s.about.map((x, i) => `<p${i === 0 ? ' class="dropcap lead"' : ''}>${esc(x)}</p>`).join('\n')}
 ${rule}
 <p><strong>${esc(site.editor)}</strong><br><em>${esc(s.editorTitle)}</em></p>
-<p><a class="link-arrow" href="${r.catalog}">${t.exploreCat}</a></p>`),
+<p><a class="link-arrow" href="${r.catalog}">${t.exploreCat}</a></p>`, 'about'),
     ld: [orgLd]
   }));
 
@@ -437,7 +438,7 @@ ${rule}
 <h1>${t.contactTitle}</h1>
 <p class="lead">${esc(s.contactIntro)}</p>
 ${rule}
-<p><a class="btn cta" href="mailto:${esc(site.email)}"><span class="btn-kicker">${t.writeTo}</span><span class="btn-label">${esc(site.email)}</span></a></p>`),
+<p><a class="btn cta" href="mailto:${esc(site.email)}"><span class="btn-kicker">${t.writeTo}</span><span class="btn-label">${esc(site.email)}</span></a></p>`, 'contact'),
     ld: [{ '@context': 'https://schema.org', '@type': 'ContactPage', name: t.contactTitle, url: abs(r.contact) }]
   }));
 
@@ -456,7 +457,7 @@ const built = Object.fromEntries(LANGS.map((l) => [l, buildLang(l)]));
     title: `Página no encontrada · Página não encontrada — ${site.name}`,
     description: 'La página que buscas no existe. · A página que você procura não existe.',
     left,
-    right: `<div class="content">
+    right: `<button type="button" class="ribbon-btn" aria-label="Abrir el índice del libro" aria-expanded="false" aria-controls="page-left"></button><div class="content">
 <p class="eyebrow">Error 404</p>
 <h1>Esta página no está en el libro</h1>
 <p class="lead">Puede que el enlace sea antiguo o esté mal escrito.</p>

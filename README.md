@@ -31,3 +31,9 @@ Doble clic en `abrir-panel.bat` (o `node admin.mjs`) → http://localhost:4000. 
 - **Guardar y actualizar** regenera la vista previa (http://localhost:3000); **Publicar** guarda en GitHub y Vercel actualiza sionbook.com.
 - Antes de cada guardado se hace una copia en `admin/.backups/` (no se sube a GitHub).
 - Un libro o próxima obra con `languages: ["es"]` solo sale en español; sin ese campo, sale en ambos.
+
+## Móvil (libro abierto)
+En pantallas estrechas el libro sigue siendo una doble página, pero solo se ve la hoja derecha; la izquierda (el índice) asoma por el borde.
+- Abrir el índice: tocar el borde izquierdo, tocar la cinta azul o deslizar el dedo desde el borde izquierdo. Cerrarlo: tocar el borde derecho o deslizar a la izquierda.
+- Pasar de sección: deslizar a la izquierda (siguiente) o a la derecha (anterior), o usar los enlaces anterior/siguiente. Al elegir una sección del índice, se vuelve a la hoja derecha y se pasa la hoja con la misma animación que en escritorio.
+- Sin JavaScript, el móvil usa el diseño apilado de siempre (todo sigue funcionando).
