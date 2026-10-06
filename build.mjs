@@ -64,10 +64,13 @@ const pages = [
   { path: '/', title: 'Inicio' },
   { path: '/catalogo/', title: 'Catálogo' },
   ...books.map((b) => ({ path: bookPath(b), title: b.title, book: b })),
+  ...(upcoming.length ? [{ path: '/proximas-obras/', title: 'Próximas obras' }] : []),
   { path: '/sobre-nosotros/', title: 'La editorial' },
   { path: '/contacto/', title: 'Contacto' }
 ];
 const folioOf = (p) => pages.findIndex((x) => x.path === p);
+// Número de capítulo (romano) según el orden del índice: Inicio, Catálogo, [Próximas obras], La editorial, Contacto
+const chapter = (p) => ['I', 'II', 'III', 'IV', 'V', 'VI'][['/', '/catalogo/', ...(upcoming.length ? ['/proximas-obras/'] : []), '/sobre-nosotros/', '/contacto/'].indexOf(p)];
 
 /* ---------- piezas visuales ---------- */
 
@@ -104,12 +107,14 @@ const upcomingBlock = () => upcoming.length
 /* ---------- página izquierda (índice) y derecha (contenido) ---------- */
 
 function leftPage(current, extra) {
+  const roman = ['I', 'II', 'III', 'IV', 'V', 'VI'];
   const main = [
-    { path: '/', label: 'Inicio', num: 'I' },
-    { path: '/catalogo/', label: 'Catálogo', num: 'II', kids: true },
-    { path: '/sobre-nosotros/', label: 'La editorial', num: 'III' },
-    { path: '/contacto/', label: 'Contacto', num: 'IV' }
-  ];
+    { path: '/', label: 'Inicio' },
+    { path: '/catalogo/', label: 'Catálogo', kids: true },
+    ...(upcoming.length ? [{ path: '/proximas-obras/', label: 'Próximas obras' }] : []),
+    { path: '/sobre-nosotros/', label: 'La editorial' },
+    { path: '/contacto/', label: 'Contacto' }
+  ].map((it, i) => ({ ...it, num: roman[i] }));
   const li = main.map((it) => {
     const aria = current === it.path ? ' aria-current="page"' : it.kids && current.startsWith('/libros/') ? ' aria-current="true"' : '';
     const kids = it.kids && books.length
@@ -290,6 +295,20 @@ ${rule}
   }));
 }
 
+// Próximas obras
+if (upcoming.length) out('proximas-obras/index.html', document_({
+  path: '/proximas-obras/', order: folioOf('/proximas-obras/') + 1, page: 'upcoming',
+  title: `Próximas obras — ${site.name}`,
+  description: `Próximas obras de ${site.name}: ${upcoming.map((u) => u.title + (u.subtitle ? ' (' + u.subtitle + ')' : '')).join('; ')}.`,
+  left: leftPage('/proximas-obras/', defaultExtra),
+  right: rightPage('/proximas-obras/', `
+<p class="eyebrow">Capítulo ${chapter('/proximas-obras/')}</p>
+<h1>Próximas obras</h1>
+<p class="lead">Los libros que estamos preparando. Cuando se publiquen, los encontrarás en el catálogo con enlaces a Amazon y Google Play Libros.</p>
+<ul class="grid">${upcoming.map(soonCard).join('')}</ul>
+<p><a class="link-arrow" href="/catalogo/">Ver el catálogo →</a></p>`)
+}));
+
 // La editorial
 out('sobre-nosotros/index.html', document_({
   path: '/sobre-nosotros/', order: folioOf('/sobre-nosotros/') + 1, page: 'about',
@@ -297,7 +316,7 @@ out('sobre-nosotros/index.html', document_({
   description: `Conoce ${site.name}, editorial independiente de libros en español y portugués dirigida por ${site.editor}.`,
   left: leftPage('/sobre-nosotros/', defaultExtra),
   right: rightPage('/sobre-nosotros/', `
-<p class="eyebrow">Capítulo III</p>
+<p class="eyebrow">Capítulo ${chapter('/sobre-nosotros/')}</p>
 <h1>La editorial</h1>
 ${site.about.map((t, i) => `<p${i === 0 ? ' class="dropcap lead"' : ''}>${esc(t)}</p>`).join('\n')}
 ${rule}
@@ -313,7 +332,7 @@ out('contacto/index.html', document_({
   description: `Escribe a ${site.name} para consultas sobre libros, prensa, distribución o colaboraciones.`,
   left: leftPage('/contacto/', defaultExtra),
   right: rightPage('/contacto/', `
-<p class="eyebrow">Capítulo IV</p>
+<p class="eyebrow">Capítulo ${chapter('/contacto/')}</p>
 <h1>Contacto</h1>
 <p class="lead">${esc(site.contactIntro)}</p>
 ${rule}
