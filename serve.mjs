@@ -1,4 +1,4 @@
-// Servidor local para previsualizar dist/ →  node serve.mjs  (http://localhost:4173)
+// Servidor local para previsualizar dist/ →  node serve.mjs  (http://localhost:3000)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,4 +18,4 @@ http.createServer((req, res) => {
   }
   res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
   fs.createReadStream(path.join(dist, '404.html')).pipe(res);
-}).listen(4173, () => console.log('Vista previa en http://localhost:4173'));
+}).listen(3000, () => console.log('Vista previa en http://localhost:3000'));
