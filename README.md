@@ -44,3 +44,21 @@ En pantallas estrechas el libro sigue siendo una doble página, pero solo se ve 
 - **Ficha de un libro:** solo su portada; la descripción y los botones de compra van a la derecha.
 - **Resto de secciones:** adorno y lema.
 En todas menos Inicio hay un enlace "← Índice" arriba; la cinta azul de la hoja derecha también lleva al índice (en móvil abre la hoja izquierda).
+
+## Panel en sionbook.com/admin
+Entras con tu correo y una contraseña; al pulsar **Guardar y publicar**, el panel guarda los cambios en GitHub (un solo commit con los datos y las portadas) y Vercel republica la web en 1–2 minutos. Funciona con funciones de Vercel (`api/admin.js` + `lib/`), sin base de datos.
+
+**Seguridad:** la contraseña nunca está en el repositorio (es público). Vive cifrada (scrypt) en variables de entorno de Vercel. Sesión de 8 h en cookie `HttpOnly`/`Secure`/`SameSite=Strict`, bloqueo tras 5 intentos fallidos, protección contra cambios simultáneos (si guardaste desde otro sitio, avisa en vez de pisarlos) y la página `/admin/` no se indexa.
+
+### Puesta en marcha (una sola vez)
+1. **Generar tu acceso:** doble clic en `crear-acceso-admin.bat` (o `node admin-setup.mjs`). Te pide tu correo y una contraseña (mín. 12 caracteres, no se ve al escribir) y te muestra 3 valores: `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`. No pegues esos valores en ningún chat.
+2. **Token de GitHub:** github.com → tu foto → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → *Generate new token*. Nombre `sionbook-admin`, caducidad 1 año, *Resource owner* `Librosud`, *Only select repositories* → `Sionbook`, y en *Repository permissions* → **Contents: Read and write**. Copia el token (`github_pat_…`).
+3. **Vercel:** proyecto `sionbook` → Settings → Environment Variables. Crea `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `SESSION_SECRET` y `GITHUB_TOKEN` (marca Production, Preview y Development; activa *Sensitive* en los tres secretos).
+4. **Redeploy:** Deployments → ⋯ en el último → *Redeploy*.
+5. Entra en **https://www.sionbook.com/admin/**.
+
+Opcional (recomendado): en Vercel → Firewall → *Rate Limiting*, limita `/api/login` a unos 10 intentos por minuto por IP.
+
+Si cambias de contraseña: vuelve a ejecutar el paso 1, actualiza `ADMIN_PASSWORD_HASH` (y `SESSION_SECRET`, que cierra todas las sesiones abiertas) y haz *Redeploy*. Si el token caduca o lo revocas, crea otro y actualiza `GITHUB_TOKEN`.
+
+El panel local (`abrir-panel.bat`, http://localhost:4000) sigue existiendo para trabajar con vista previa antes de publicar. Pruebas automáticas: `npm test`.

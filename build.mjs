@@ -484,7 +484,7 @@ ${rule}
 
 out('favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#fff"/><path d="M14 8h18v40l-18-7z" fill="#00b4ff"/><path d="M32 8h18v33l-18 7z" fill="#0a2cff"/></svg>`);
 
-out('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${site.url}/sitemap.xml\n`);
+out('robots.txt', `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\n\nSitemap: ${site.url}/sitemap.xml\n`);
 
 // Sitemap con alternativas de idioma (hreflang)
 const lastmod = today.toISOString().slice(0, 10);
@@ -496,6 +496,10 @@ const sitemapUrl = (lang, key) => {
 out('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${LANGS.flatMap((l) => built[l].map((p) => sitemapUrl(l, p.key))).join('\n')}\n</urlset>\n`);
 
 out('_headers', `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n`);
+
+// Panel de administración web (sionbook.com/admin): solo la interfaz; el acceso y los datos van por /api (ver lib/admin-api.js)
+const adminHtml = path.join(root, 'admin/index.html');
+if (fs.existsSync(adminHtml)) out('admin/index.html', fs.readFileSync(adminHtml));
 
 // Logo de la marca (assets/brand → dist/brand)
 const brandDir = path.join(root, 'assets/brand');

@@ -75,16 +75,23 @@
   .stat { display: flex; gap: 22px; flex-wrap: wrap; margin: 4px 0 14px; }
   .stat div b { display: block; font-size: 24px; color: var(--navy); }
   .adv summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+  .login { max-width: 400px; margin: 8vh auto 0; }
+  .login .f + .f { margin-top: 14px; }
+  .login .err { color: var(--bad); font-size: 14px; min-height: 20px; margin: 10px 0 0; }
+  .login pre { background: #f4f6fd; border: 1px solid var(--line); padding: 10px; border-radius: 8px; font-size: 12.5px; white-space: pre-wrap; }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <header class="top">
-  <img src="/logo.png" alt="Sion Book">
+  <img src="/brand/logo.png" alt="Sion Book">
   <h1>Panel de administración</h1>
   <span class="spacer"></span>
+  <span class="state" id="who" hidden></span>
   <span class="state" id="state">Todo guardado</span>
-  <a class="btn" href="http://localhost:3000" target="_blank" rel="noopener">Ver el sitio ↗</a>
+  <a class="btn" id="site-link" href="http://localhost:3000" target="_blank" rel="noopener">Ver el sitio ↗</a>
   <button class="primary" id="save">Guardar y actualizar</button>
+  <button id="logout" hidden>Salir</button>
 </header>
 <nav class="tabs" role="tablist" id="tabs">
   <button role="tab" data-tab="books">Libros publicados</button>
@@ -133,6 +140,23 @@ function markDirty() { dirty = true; const s = $('#state'); s.textContent = 'Cam
 function markClean() { dirty = false; const s = $('#state'); s.textContent = 'Todo guardado'; s.className = 'state'; }
 window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 
+let cloud = false;         // true en sionbook.com/admin; false en el panel local
+let etag = null;           // versión de los datos que se abrió (para no pisar cambios hechos desde otro sitio)
+const pending = [];        // portadas subidas a GitHub y aún sin publicar: { path, sha }
+const previews = {};       // vista previa local de portadas recién subidas (aún no están en la web)
+const urlFor = (p) => previews[p] || p;
+
+const fileToBase64 = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+// Si la imagen es muy grande se reduce (máx. 1800 px de lado, JPG); si ya es razonable, se sube tal cual
+async function prepareImage(file) {
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
+  if (scale === 1 && file.size <= 1.5 * 1024 * 1024) return file;
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+  const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(bmp, 0, 0, c.width, c.height);
+  return await new Promise((res) => c.toBlob(res, 'image/jpeg', 0.88));
+}
+
 const BOTH = ['es', 'pt'];
 const langsOf = (o) => (Array.isArray(o.languages) ? o.languages : BOTH);
 
@@ -171,9 +195,8 @@ function coverBox(obj, key, title, slugBase) {
   const thumb = h('div', { class: 'thumb' });
   const info = h('div', { class: 'cover-info' });
   const paint = () => {
-    thumb.style.backgroundImage = obj[key] ? `url("${obj[key]}")` : '';
     thumb.style.background = obj[key] ? '' : '#dfe6fb';
-    if (obj[key]) thumb.style.backgroundImage = `url("${obj[key]}?v=${Date.now() % 100000}")`;
+    if (obj[key]) thumb.style.backgroundImage = `url("${urlFor(obj[key])}")`;
     thumb.style.backgroundSize = 'cover';
     info.innerHTML = obj[key] ? `<div>${obj[key]}</div>` : '<div>Sin portada: el sitio genera una con el título y el color.</div>';
     if (obj[key]) {
@@ -183,7 +206,7 @@ function coverBox(obj, key, title, slugBase) {
         const good = Math.abs(ratio - 2 / 3) < 0.03;
         info.insertAdjacentHTML('beforeend', `<div class="${good ? 'ok' : 'warn'}">${im.naturalWidth}×${im.naturalHeight}px ${good ? '✓ proporción 2:3' : '⚠ no es 2:3; se recortará para encajar'}</div>`);
       };
-      im.src = obj[key];
+      im.src = urlFor(obj[key]);
     }
   };
   const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', style: 'display:none' });
@@ -191,9 +214,12 @@ function coverBox(obj, key, title, slugBase) {
     const f = file.files[0]; if (!f) return;
     try {
       const base = slugBase() || 'portada';
-      const r = await api('/api/upload?name=' + encodeURIComponent(base), { method: 'POST', headers: { 'content-type': 'application/octet-stream' }, body: f });
+      const blob = await prepareImage(f);
+      const r = await api('/api/upload', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: base, dataBase64: await fileToBase64(blob) }) });
       if (!r.ok) throw new Error(r.error);
-      obj[key] = r.path; markDirty(); paint(); toast(`Portada subida (${r.kb} KB)`, 'good');
+      previews[r.path] = URL.createObjectURL(blob);
+      if (cloud) pending.push({ path: r.path, sha: r.sha });
+      obj[key] = r.path; markDirty(); paint(); toast(`Portada subida (${r.kb} KB)${cloud ? '. Se publicará al guardar.' : ''}`, 'good');
     } catch (e) { toast(e.message, 'bad'); }
     file.value = '';
   });
@@ -211,7 +237,7 @@ function renderList() {
   const box = $('#listbox'); if (!box) return;
   const arr = data[tab]; const list = h('div', { class: 'list' });
   arr.forEach((o, i) => {
-    const th = h('div', { class: 'thumb' }); if (o.cover) th.style.backgroundImage = `url("${o.cover}")`; else th.style.background = o.color || '#0a2a8a';
+    const th = h('div', { class: 'thumb' }); if (o.cover) th.style.backgroundImage = `url("${urlFor(o.cover)}")`; else th.style.background = o.color || '#0a2a8a';
     th.style.backgroundSize = 'cover';
     const ls = langsOf(o);
     list.append(h('div', { class: 'item', 'aria-current': String(i === sel[tab]), onclick: () => { sel[tab] = i; render(); } },
@@ -381,27 +407,82 @@ $('#tabs').addEventListener('click', async (e) => {
 });
 
 $('#save').addEventListener('click', async () => {
-  const btn = $('#save'); btn.disabled = true; btn.textContent = 'Guardando…';
+  if (cloud && !confirm('Esto publica los cambios en sionbook.com (Vercel tarda 1–2 minutos en mostrarlos). ¿Continuar?')) return;
+  const btn = $('#save'); const label = btn.textContent; btn.disabled = true; btn.textContent = cloud ? 'Publicando…' : 'Guardando…';
   try {
     // Los textos numéricos se guardan como números; los campos vacíos opcionales se quitan
     const payload = JSON.parse(JSON.stringify(data));
     for (const b of payload.books) for (const k of ['year', 'pages']) { if (b[k] === '' || b[k] == null) b[k] = ''; else if (!isNaN(b[k])) b[k] = Number(b[k]); }
+    if (cloud) { payload.etag = etag; payload.covers = pending; }
     const r = await api('/api/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
     if (!r.ok) throw new Error(r.error || r.log || 'No se pudo guardar');
     data.books.forEach((b) => { delete b._new; }); data.upcoming.forEach((u) => { delete u._new; });
-    markClean(); lastLog = r.log;
-    const warn = (r.log.match(/⚠[^\n]*/g) || []);
-    toast(warn.length ? `Guardado. Avisos: ${warn.slice(0, 2).join(' · ')}` : 'Guardado. La vista previa ya está actualizada.', warn.length ? '' : 'good');
+    markClean();
+    if (cloud) {
+      etag = r.etag; pending.length = 0;
+      toast(r.unchanged ? 'No había cambios que publicar.' : 'Publicado. En 1–2 minutos estará en sionbook.com', r.unchanged ? '' : 'good');
+    } else {
+      lastLog = r.log;
+      const warn = (r.log.match(/⚠[^\n]*/g) || []);
+      toast(warn.length ? `Guardado. Avisos: ${warn.slice(0, 2).join(' · ')}` : 'Guardado. La vista previa ya está actualizada.', warn.length ? '' : 'good');
+    }
   } catch (e) { toast(e.message, 'bad'); }
-  btn.disabled = false; btn.textContent = 'Guardar y actualizar';
+  btn.disabled = false; btn.textContent = label;
 });
 
-(async () => {
+/* ---------- acceso (solo en sionbook.com/admin) ---------- */
+function renderLogin(msg) {
+  const email = h('input', { type: 'email', autocomplete: 'username', required: true });
+  const pass = h('input', { type: 'password', autocomplete: 'current-password', required: true });
+  const err = h('p', { class: 'err', role: 'alert' }, msg || '');
+  const btn = h('button', { class: 'primary', type: 'submit', style: 'width:100%;justify-content:center;margin-top:14px' }, 'Entrar');
+  const form = h('form', { class: 'card login', onsubmit: async (e) => {
+    e.preventDefault(); btn.disabled = true; err.textContent = '';
+    try {
+      const r = await api('/api/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: email.value, password: pass.value }) });
+      if (!r.ok) throw new Error(r.error);
+      pass.value = ''; await start();
+    } catch (x) { err.textContent = x.message; btn.disabled = false; pass.value = ''; pass.focus(); }
+  } },
+    h('h2', {}, 'Entrar al panel'),
+    h('label', { class: 'f' }, 'Correo', email), h('label', { class: 'f' }, 'Contraseña', pass), btn, err);
+  view.replaceChildren(form); email.focus();
+}
+function renderNotConfigured(s) {
+  view.replaceChildren(h('div', { class: 'card login' }, h('h2', {}, 'Falta configurar el acceso'),
+    h('p', {}, 'El panel está instalado, pero todavía faltan estas variables en Vercel:'),
+    h('pre', {}, (s.missing || []).join('\n')),
+    h('p', { class: 'note' }, 'Sigue el paso a paso del README (sección “Panel en sionbook.com/admin”) y vuelve a desplegar.')));
+}
+function applyMode(s) {
+  cloud = s.mode === 'cloud';
+  if (!cloud) return;
+  $('#site-link').href = 'https://www.sionbook.com';
+  $('#save').textContent = 'Guardar y publicar';
+  document.querySelector('#tabs [data-tab="publish"]').hidden = true;
+  if (s.authenticated) {
+    $('#who').hidden = false; $('#who').textContent = s.email; $('#logout').hidden = false;
+  } else { $('#save').hidden = true; $('#state').hidden = true; $('#tabs').hidden = true; }
+}
+$('#logout').addEventListener('click', async () => {
+  if (dirty && !confirm('Tienes cambios sin guardar. ¿Salir igualmente?')) return;
+  try { await api('/api/logout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' }); } catch {}
+  dirty = false; location.reload();
+});
+
+async function start() {
+  const s = await api('/api/session');
+  applyMode(s);
+  if (cloud && !s.configured) return renderNotConfigured(s);
+  if (cloud && !s.authenticated) return renderLogin();
+  if (cloud) { $('#save').hidden = false; $('#state').hidden = false; $('#tabs').hidden = false; }
   data = await api('/api/data');
+  etag = data.etag || null;
   data.books.forEach((b) => { if (!Array.isArray(b.languages)) b.languages = [...BOTH]; });
   data.upcoming.forEach((u) => { if (!Array.isArray(u.languages)) u.languages = [...BOTH]; });
   render();
-})();
+}
+start().catch((e) => { view.replaceChildren(h('div', { class: 'card login' }, h('h2', {}, 'No se pudo abrir el panel'), h('p', {}, e.message))); });
 </script>
 </body>
 </html>

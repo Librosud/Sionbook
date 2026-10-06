@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { clean, validate, imageKind, safeBase } from './lib/validate.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.ADMIN_PORT) || 4000;
@@ -39,50 +40,12 @@ function body(req, limit = 12_000_000) {
   });
 }
 
-/* ---------- validación al guardar ---------- */
-
-const clean = (v) => {
-  if (Array.isArray(v)) return v.map(clean);
-  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).filter(([k]) => !k.startsWith('_')).map(([k, x]) => [k, clean(x)]));
-  return v;
-};
-
-function validate({ books, upcoming, site }) {
-  if (!Array.isArray(books) || !Array.isArray(upcoming) || !site || typeof site !== 'object') throw new Error('Datos incompletos.');
-  const seen = new Set();
-  for (const b of books) {
-    if (!b.title || !b.author) throw new Error(`Falta el título o el autor en un libro (${b.title || 'sin título'}).`);
-    if (!/^[a-z0-9-]+$/.test(b.slug || '')) throw new Error(`"${b.title}": la dirección web solo admite minúsculas, números y guiones.`);
-    if (seen.has(b.slug)) throw new Error(`Dos libros tienen la misma dirección web: ${b.slug}`);
-    seen.add(b.slug);
-    if (b.slug_pt && !/^[a-z0-9-]+$/.test(b.slug_pt)) throw new Error(`"${b.title}": la dirección en portugués solo admite minúsculas, números y guiones.`);
-    if (!Array.isArray(b.languages) || !b.languages.length) throw new Error(`"${b.title}": elige al menos un idioma donde mostrarlo.`);
-    for (const k of ['amazonPrint', 'amazonKindle', 'googlePlay']) {
-      if (b[k] && !/^https:\/\//.test(b[k])) throw new Error(`"${b.title}": el enlace "${k}" debe empezar por https://`);
-    }
-  }
-  for (const u of upcoming) {
-    if (!u.title || !u.author) throw new Error(`Falta el título o el autor en una próxima obra (${u.title || 'sin título'}).`);
-    if (!Array.isArray(u.languages) || !u.languages.length) throw new Error(`"${u.title}": elige al menos un idioma donde mostrarla.`);
-  }
-  for (const l of ['es', 'pt']) if (!site[l] || !Array.isArray(site[l].about)) throw new Error(`Faltan los textos de la editorial en ${l}.`);
-}
-
 function backup() {
   fs.mkdirSync(BACKUPS, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   for (const [name, p] of Object.entries(DATA)) if (fs.existsSync(p)) fs.copyFileSync(p, path.join(BACKUPS, `${stamp}-${name}.json`));
   const all = fs.readdirSync(BACKUPS).sort();
   for (const f of all.slice(0, Math.max(0, all.length - 60))) fs.unlinkSync(path.join(BACKUPS, f));
-}
-
-/* ---------- imágenes ---------- */
-
-function imageKind(buf) {
-  if (buf.length > 12 && buf[0] === 0xff && buf[1] === 0xd8) return 'jpg';
-  if (buf.length > 12 && buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'png';
-  if (buf.length > 12 && buf.subarray(0, 4).toString() === 'RIFF' && buf.subarray(8, 12).toString() === 'WEBP') return 'webp';
-  return null;
 }
 
 /* ---------- servidor ---------- */
@@ -99,12 +62,13 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'GET') {
       if (p === '/') return send(res, 200, types['.html'], fs.readFileSync(file('admin/index.html')));
-      if (p === '/logo.png') return send(res, 200, 'image/png', fs.readFileSync(file('assets/brand/logo.png')));
+      if (p === '/brand/logo.png' || p === '/logo.png') return send(res, 200, 'image/png', fs.readFileSync(file('assets/brand/logo.png')));
       if (p.startsWith('/covers/')) {
         const f = path.join(COVERS, path.basename(p));
         if (fs.existsSync(f)) return send(res, 200, types[path.extname(f).toLowerCase()] || 'application/octet-stream', fs.readFileSync(f));
         return send(res, 404, 'text/plain', 'No existe');
       }
+      if (p === '/api/session') return json(res, 200, { mode: 'local', configured: true, authenticated: true });
       if (p === '/api/data') {
         return json(res, 200, { books: readJSON(DATA.books, []), upcoming: readJSON(DATA.upcoming, []), site: readJSON(DATA.site, {}) });
       }
@@ -132,15 +96,16 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (p === '/api/upload') {
-      const buf = await body(req);
+      const { name, dataBase64 } = JSON.parse((await body(req)).toString('utf8'));
+      const buf = Buffer.from(String(dataBase64 || ''), 'base64');
       const kind = imageKind(buf);
       if (!kind) throw new Error('Formato no válido. Usa JPG, PNG o WebP.');
-      const base = (url.searchParams.get('name') || 'portada').toLowerCase().replace(/\.[a-z0-9]+$/, '').replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'portada';
+      const base = safeBase(name);
       fs.mkdirSync(COVERS, { recursive: true });
-      let name = `${base}.${kind}`;
-      for (let i = 2; fs.existsSync(path.join(COVERS, name)); i++) name = `${base}-${i}.${kind}`;
-      fs.writeFileSync(path.join(COVERS, name), buf);
-      return json(res, 200, { ok: true, path: `/covers/${name}`, kb: Math.round(buf.length / 1024) });
+      let file_ = `${base}.${kind}`;
+      for (let i = 2; fs.existsSync(path.join(COVERS, file_)); i++) file_ = `${base}-${i}.${kind}`;
+      fs.writeFileSync(path.join(COVERS, file_), buf);
+      return json(res, 200, { ok: true, path: `/covers/${file_}`, kb: Math.round(buf.length / 1024) });
     }
 
     if (p === '/api/publish') {
