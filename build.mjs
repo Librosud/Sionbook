@@ -12,6 +12,7 @@ const dist = path.join(root, 'dist');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 const site = JSON.parse(read('site.json'));
 const books = JSON.parse(read('data/books.json'));
+const upcoming = fs.existsSync(path.join(root, 'data/proximas.json')) ? JSON.parse(read('data/proximas.json')) : [];
 const today = new Date();
 const year = today.getFullYear();
 
@@ -52,6 +53,10 @@ for (const b of books) {
   if (!b.description) console.warn(`⚠ ${b.slug}: sin descripción (Google necesita texto para indexar la ficha).`);
 }
 
+for (const u of upcoming) {
+  if (!u.title || !u.author) throw new Error(`Próxima obra "${u.title || '?'}": faltan título o autor.`);
+}
+
 /* ---------- páginas en orden de lectura ---------- */
 
 const bookPath = (b) => `/libros/${b.slug}/`;
@@ -84,6 +89,17 @@ function cover(b, { cls = '', decorative = false } = {}) {
 function card(b, withCategory = false) {
   return `<li class="card"${withCategory ? ` data-category="${esc(b.category || '')}"` : ''}>${cover(b, { decorative: true })}${b.category ? `<p class="card-cat">${esc(b.category)}</p>` : ''}<h3 class="card-title"><a href="${bookPath(b)}">${esc(b.title)}</a></h3><p class="card-author">${esc(b.author)}</p></li>`;
 }
+
+function soonCard(b) {
+  return `<li class="card card--soon">${cover(b, { decorative: true })}<p class="card-cat">Próximamente${b.when ? ' · ' + esc(b.when) : ''}</p><h3 class="card-title">${esc(b.title)}</h3>${b.subtitle ? `<p class="card-sub">${esc(b.subtitle)}</p>` : ''}<p class="card-author">${esc(b.author)}</p></li>`;
+}
+
+// Sección "Próximas obras": solo aparece si data/proximas.json tiene títulos
+const upcomingBlock = () => upcoming.length
+  ? `${rule}
+<section aria-labelledby="proximas"><h2 id="proximas">Próximas obras</h2>
+<ul class="grid">${upcoming.map(soonCard).join('')}</ul></section>`
+  : '';
 
 /* ---------- página izquierda (índice) y derecha (contenido) ---------- */
 
@@ -188,6 +204,7 @@ ${rule}
 <h2>Novedades</h2>
 <ul class="grid">${books.slice(0, 3).map((b) => card(b)).join('')}</ul>
 <p><a class="link-arrow" href="/catalogo/">Ver todo el catálogo →</a></p>
+${upcomingBlock()}
 ${rule}
 <h2>Cómo comprar</h2>
 <ul class="formats">
@@ -211,7 +228,8 @@ out('catalogo/index.html', document_({
 <h1>Catálogo</h1>
 <p class="lead">Todos nuestros libros, con enlace directo a Amazon y Google Play Libros.</p>
 ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="group" aria-label="Filtrar por categoría"><button type="button" class="chip" data-filter="all" aria-pressed="true">Todos</button>${categories.map((c) => `<button type="button" class="chip" data-filter="${esc(c)}" aria-pressed="false">${esc(c)}</button>`).join('')}</div>` : ''}
-<ul class="grid">${books.map((b) => card(b, true)).join('')}</ul>`),
+<ul class="grid">${books.map((b) => card(b, true)).join('')}</ul>
+${upcomingBlock()}`),
   ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Catálogo', url: abs('/catalogo/'), isPartOf: { '@type': 'WebSite', name: site.name, url: site.url } }]
 }));
 
