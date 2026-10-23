@@ -31,8 +31,8 @@
     "title": "Quién es quién en el Nuevo Testamento",
     "subtitle": "Diccionario biográfico y doctrinal de personas, grupos y conceptos del Nuevo Testamento",
     "author": "Lucas Calveiro",
-    "year": "",
-    "pages": "",
+    "year": 2026,
+    "pages": 170,
     "isbn": "",
     "language": "Español",
     "category": "Diccionario bíblico",
@@ -48,8 +48,7 @@
     "title_pt": "Quem é quem no Novo Testamento",
     "slug_pt": "quem-e-quem-no-novo-testamento",
     "languages": [
-      "es",
-      "pt"
+      "es"
     ],
     "cover_pt": "/covers/quien-es-quien-en-el-nuevo-testamento-pt-f473d6.jpg"
   },
