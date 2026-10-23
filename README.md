@@ -66,3 +66,6 @@ El panel local (`abrir-panel.bat`, http://localhost:4000) sigue existiendo para 
 ## Formulario de contacto y política de privacidad
 - **Formulario:** se activa al pegar el enlace en el panel (Textos de la editorial → Formulario de contacto) o en `site.json` → `contactEndpoint`. Formspree: `https://formspree.io/f/xxxxxxxx`. Web3Forms: `https://api.web3forms.com/submit` + tu clave pública en `contactAccessKey`. Vacío = solo el botón de correo.
 - **Política de privacidad:** texto en `data/privacy.json` (es/pt), página propia al final del libro y enlazada en el pie. Es una plantilla general: revísala (sobre todo el plazo de conservación, 24 meses) y, si hace falta, consúltala con un profesional. Si cambias de servicio de formularios, actualiza la sección "Servicios externos".
+
+## Panel: español y português por separado
+Como cada idioma puede tener páginas distintas, el panel las separa: en **Libros** y **Próximas obras** hay un filtro **Todos / Español / Português** con contador (en cada idioma se ve y se ordena su propia lista, con el número de página); lo nuevo que añadas con un filtro activo nace solo en ese idioma. La pestaña **Mapa del sitio (ES / PT)** muestra las páginas de cada idioma lado a lado y marca las que existen en uno solo. Cada ficha indica en qué página queda en cada idioma.

@@ -80,6 +80,21 @@
   .login .err { color: var(--bad); font-size: 14px; min-height: 20px; margin: 10px 0 0; }
   .login pre { background: #f4f6fd; border: 1px solid var(--line); padding: 10px; border-radius: 8px; font-size: 12.5px; white-space: pre-wrap; }
   [hidden] { display: none !important; }
+  .segbar { display: flex; gap: 4px; padding: 3px; margin: 0 0 12px; background: var(--bg); border-radius: 10px; }
+  .seg { flex: 1; justify-content: center; padding: 6px 8px; border: 0; background: transparent; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .seg.on { background: #fff; color: var(--blue); box-shadow: 0 1px 4px #0a1f6b33; }
+  .seg .cnt { margin-left: 5px; font-size: 11px; background: #dfe6fb; color: var(--blue-2); border-radius: 999px; padding: 0 6px; }
+  .pgnum { margin-left: 6px; font-size: 12px; color: var(--muted); }
+  .pginfo { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 4px; }
+  .pginfo .pg { font-size: 13px; padding: 5px 10px; border-radius: 8px; background: #eef2ff; color: var(--blue-2); }
+  .pginfo .pg.off { background: #f1f1f1; color: #888; }
+  ol.map { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  ol.map li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  ol.map li.is-link { cursor: pointer; }
+  ol.map li.is-link:hover { border-color: var(--blue); }
+  ol.map .n { width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #eef2ff; color: var(--blue-2); font-size: 12px; font-weight: 700; }
+  ol.map .t { flex: 1; } ol.map .t small { color: var(--muted); }
+  ol.map .only { font-size: 11px; font-weight: 700; color: var(--warn); background: #fff4e0; padding: 2px 8px; border-radius: 999px; }
 </style>
 </head>
 <body>
@@ -96,6 +111,7 @@
 <nav class="tabs" role="tablist" id="tabs">
   <button role="tab" data-tab="books">Libros publicados</button>
   <button role="tab" data-tab="upcoming">Próximas obras</button>
+  <button role="tab" data-tab="map">Mapa del sitio (ES / PT)</button>
   <button role="tab" data-tab="site">Textos de la editorial</button>
   <button role="tab" data-tab="publish">Publicar en sionbook.com</button>
 </nav>
@@ -184,7 +200,7 @@ function whereBox(obj) {
     cb.checked = obj.languages.includes(code);
     cb.addEventListener('change', () => {
       obj.languages = BOTH.filter((l) => (l === code ? cb.checked : obj.languages.includes(l)));
-      markDirty(); renderList();
+      markDirty(); render(); // vuelve a pintar también el número de página de cada idioma
     });
     return h('label', {}, cb, h('span', { class: 'lang-tag ' + code }, code.toUpperCase()), name);
   };
@@ -235,32 +251,80 @@ function coverBox(obj, key, title, slugBase) {
 }
 
 /* ---------- lista lateral ---------- */
+/* ---------- idiomas: el sitio en español y en português no tienen las mismas páginas ---------- */
+let langFilter = 'all';    // filtro de las listas: 'all' | 'es' | 'pt'
+const LANG_NAME = { es: 'español', pt: 'português' };
+const inLang = (o, l) => langsOf(o).includes(l);
+const visible = (kind) => data[kind].map((o, i) => i).filter((i) => langFilter === 'all' || inLang(data[kind][i], langFilter));
+const titleIn = (o, l) => (l === 'pt' && o.title_pt) || o.title || '(sin título)';
+// Número de página de un libro en cada idioma (1 = Inicio, 2 = Catálogo, luego los libros)
+const bookPage = (o, l) => (inLang(o, l) ? 3 + data.books.filter((b) => inLang(b, l)).indexOf(o) : null);
+
+function filterBar(kind) {
+  const count = (l) => data[kind].filter((o) => l === 'all' || inLang(o, l)).length;
+  const btn = (l, label) => h('button', { type: 'button', class: 'seg' + (langFilter === l ? ' on' : ''), 'aria-pressed': String(langFilter === l), onclick: () => {
+    langFilter = l; const v = visible(kind); if (v.length && !v.includes(sel[kind])) sel[kind] = v[0]; render();
+  } }, label, h('span', { class: 'cnt' }, count(l)));
+  return h('div', { class: 'segbar', role: 'group', 'aria-label': 'Ver las páginas de un idioma' }, btn('all', 'Todos'), btn('es', 'Español'), btn('pt', 'Português'));
+}
+
 function renderList() {
   const box = $('#listbox'); if (!box) return;
-  const arr = data[tab]; const list = h('div', { class: 'list' });
-  arr.forEach((o, i) => {
+  const arr = data[tab]; const vis = visible(tab); const list = h('div', { class: 'list' });
+  vis.forEach((i, pos) => {
+    const o = arr[i];
     const th = h('div', { class: 'thumb' }); if (o.cover) th.style.backgroundImage = `url("${urlFor(o.cover)}")`; else th.style.background = o.color || '#0a2a8a';
     th.style.backgroundSize = 'cover';
     const ls = langsOf(o);
+    const pg = tab === 'books' && langFilter !== 'all' ? bookPage(o, langFilter) : null;
     list.append(h('div', { class: 'item', 'aria-current': String(i === sel[tab]), onclick: () => { sel[tab] = i; render(); } },
       th,
-      h('div', {}, h('b', {}, o.title || '(sin título)'), h('small', {}, o.author || ''), h('div', {}, BOTH.map((l) => h('span', { class: 'badge' + (ls.includes(l) ? '' : ' off') }, l.toUpperCase())))),
+      h('div', {}, h('b', {}, langFilter === 'all' ? (o.title || '(sin título)') : titleIn(o, langFilter)), h('small', {}, o.author || ''),
+        h('div', {}, BOTH.map((l) => h('span', { class: 'badge' + (ls.includes(l) ? '' : ' off') }, l.toUpperCase())), pg ? h('span', { class: 'pgnum' }, `pág. ${pg}`) : null)),
       h('div', { class: 'mv' },
-        h('button', { class: 'small', title: 'Subir', disabled: i === 0, onclick: (e) => { e.stopPropagation(); move(i, -1); } }, '▲'),
-        h('button', { class: 'small', title: 'Bajar', disabled: i === arr.length - 1, onclick: (e) => { e.stopPropagation(); move(i, 1); } }, '▼'))));
+        h('button', { class: 'small', title: 'Subir', disabled: pos === 0, onclick: (e) => { e.stopPropagation(); move(i, -1); } }, '▲'),
+        h('button', { class: 'small', title: 'Bajar', disabled: pos === vis.length - 1, onclick: (e) => { e.stopPropagation(); move(i, 1); } }, '▼'))));
   });
-  if (!arr.length) list.append(h('div', { class: 'empty' }, 'Todavía no hay nada aquí.'));
+  if (!vis.length) list.append(h('div', { class: 'empty' }, langFilter === 'all' ? 'Todavía no hay nada aquí.' : `Todavía no hay nada en el sitio en ${LANG_NAME[langFilter]}.`));
   box.replaceChildren(list);
 }
+// Mover respeta el filtro: se intercambia con el vecino visible (así el orden de cada idioma queda como lo ves)
 function move(i, d) {
-  const arr = data[tab]; const j = i + d; if (j < 0 || j >= arr.length) return;
+  const arr = data[tab]; const vis = visible(tab); const j = vis[vis.indexOf(i) + d];
+  if (j === undefined) return;
   [arr[i], arr[j]] = [arr[j], arr[i]]; sel[tab] = j; markDirty(); render();
+}
+
+/* ---------- mapa del sitio: las páginas de cada idioma, lado a lado ---------- */
+function sitePages(l) {
+  const es = l === 'es';
+  const up = data.upcoming.filter((u) => inLang(u, l));
+  const pages = [{ label: es ? 'Inicio' : 'Início' }, { label: 'Catálogo' }];
+  data.books.filter((b) => inLang(b, l)).forEach((b) => pages.push({ label: titleIn(b, l), book: b, only: !inLang(b, l === 'es' ? 'pt' : 'es') }));
+  if (up.length) pages.push({ label: 'Próximas obras', note: `${up.length} ${up.length === 1 ? 'obra' : 'obras'}`, only: !data.upcoming.some((u) => inLang(u, l === 'es' ? 'pt' : 'es')) });
+  pages.push({ label: es ? 'La editorial' : 'A editora' }, { label: es ? 'Contacto' : 'Contato' }, { label: es ? 'Política de privacidad' : 'Política de privacidade' });
+  return pages;
+}
+function mapView() {
+  const cols = BOTH.map((l) => ({ l, pages: sitePages(l) }));
+  const diff = Math.abs(cols[0].pages.length - cols[1].pages.length);
+  const col = ({ l, pages }) => h('div', { class: 'card' },
+    h('h2', {}, h('span', { class: 'lang-tag ' + l }, l.toUpperCase()), `Sitio en ${LANG_NAME[l]}`),
+    h('div', { class: 'stat' }, h('div', {}, h('b', {}, pages.length), 'páginas')),
+    h('ol', { class: 'map' }, pages.map((p, i) => h('li', { class: p.book ? 'is-link' : '', onclick: p.book ? () => { tab = 'books'; langFilter = l; sel.books = data.books.indexOf(p.book); render(); } : null },
+      h('span', { class: 'n' }, i + 1), h('span', { class: 't' }, p.label, p.note ? h('small', {}, ` · ${p.note}`) : null),
+      p.only ? h('span', { class: 'only' }, `solo en ${l.toUpperCase()}`) : null))));
+  return h('div', {},
+    h('p', { class: 'note', style: 'margin:0 0 14px' }, diff || cols.some((c) => c.pages.some((p) => p.only))
+      ? `El sitio en español (${cols[0].pages.length} páginas) y el sitio en português (${cols[1].pages.length} páginas) no tienen las mismas páginas. Las marcadas “solo en ES / PT” existen en un único idioma. Toca un libro para editarlo.`
+      : 'Los dos idiomas tienen las mismas páginas. Toca un libro para editarlo.'),
+    h('div', { class: 'grid2' }, cols.map(col)));
 }
 
 /* ---------- editor de libro / próxima obra ---------- */
 function editor(kind) {
   const arr = data[kind]; const o = arr[sel[kind]];
-  if (!o) return h('div', { class: 'card empty' }, kind === 'books' ? 'Añade tu primer libro con el botón de la izquierda.' : 'Añade una próxima obra con el botón de la izquierda.');
+  if (!o || !visible(kind).includes(sel[kind])) return h('div', { class: 'card empty' }, langFilter !== 'all' ? `No hay nada en el sitio en ${LANG_NAME[langFilter]} todavía. Añade uno con el botón de la izquierda.` : kind === 'books' ? 'Añade tu primer libro con el botón de la izquierda.' : 'Añade una próxima obra con el botón de la izquierda.');
   const isBook = kind === 'books';
   const slugField = () => {
     const f = field('Dirección web (español)', o, 'slug', { hint: 'solo minúsculas, números y guiones', onchange: () => { o._slugTouched = true; } });
@@ -271,6 +335,11 @@ function editor(kind) {
 
   const card = h('div', { class: 'card' });
   card.append(
+    h('div', { class: 'pginfo' }, BOTH.map((l) => {
+      const on = inLang(o, l);
+      const text = !on ? `No aparece en el sitio en ${LANG_NAME[l]}` : isBook ? `Página ${bookPage(o, l)} del sitio en ${LANG_NAME[l]}` : `Aparece en “Próximas obras” del sitio en ${LANG_NAME[l]}`;
+      return h('span', { class: 'pg' + (on ? '' : ' off') }, h('span', { class: 'lang-tag ' + l }, l.toUpperCase()), text);
+    })),
     h('h3', {}, 'Dónde aparece'), whereBox(o),
     h('h3', {}, 'Título y datos'),
     h('div', { class: 'grid2' },
@@ -331,13 +400,15 @@ function editor(kind) {
 
 function listPane(kind) {
   const add = h('button', { class: 'primary', style: 'width:100%;justify-content:center;margin-bottom:12px', onclick: () => {
+    // Si estás viendo un solo idioma, lo nuevo nace solo en ese idioma
+    const langs = langFilter === 'all' ? [...BOTH] : [langFilter];
     const base = kind === 'books'
-      ? { slug: '', title: 'Nuevo libro', author: data.site.editor || '', language: 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', languages: [...BOTH], _new: true }
-      : { title: 'Nueva obra', author: data.site.editor || '', color: '#0a2a8a', cover: '', languages: [...BOTH], _new: true };
+      ? { slug: '', title: 'Nuevo libro', author: data.site.editor || '', language: langFilter === 'pt' ? 'Português' : 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', languages: langs, _new: true }
+      : { title: 'Nueva obra', author: data.site.editor || '', color: '#0a2a8a', cover: '', languages: langs, _new: true };
     data[kind].push(base); sel[kind] = data[kind].length - 1; markDirty(); render();
-  } }, kind === 'books' ? '＋ Añadir libro' : '＋ Añadir próxima obra');
-  return h('div', { class: 'card' }, h('h2', {}, kind === 'books' ? 'Libros publicados' : 'Próximas obras'), add, h('div', { id: 'listbox' }),
-    h('p', { class: 'note' }, 'El orden de esta lista es el orden del sitio. Usa ▲ ▼ para cambiarlo.'));
+  } }, (kind === 'books' ? '＋ Añadir libro' : '＋ Añadir próxima obra') + (langFilter === 'all' ? '' : ` (${LANG_NAME[langFilter]})`));
+  return h('div', { class: 'card' }, h('h2', {}, kind === 'books' ? 'Libros publicados' : 'Próximas obras'), filterBar(kind), add, h('div', { id: 'listbox' }),
+    h('p', { class: 'note' }, langFilter === 'all' ? 'Aquí ves todo. Elige Español o Português para ver y ordenar solo las páginas de ese idioma.' : `Orden del sitio en ${LANG_NAME[langFilter]}. Usa ▲ ▼ para cambiarlo; el otro idioma no se toca.`));
 }
 
 /* ---------- textos de la editorial ---------- */
@@ -402,9 +473,11 @@ function render() {
   document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
   view.replaceChildren();
   if (tab === 'books' || tab === 'upcoming') {
+    const vis = visible(tab); if (vis.length && !vis.includes(sel[tab])) sel[tab] = vis[0];
     view.append(h('div', { class: 'layout' }, listPane(tab), editor(tab)));
     renderList();
-  } else if (tab === 'site') view.append(siteView());
+  } else if (tab === 'map') view.append(mapView());
+  else if (tab === 'site') view.append(siteView());
   else view.append(publishView());
 }
 
