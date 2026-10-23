@@ -10,7 +10,7 @@
     "language": "Español",
     "category": "Comentario doctrinal",
     "color": "#0a2a8a",
-    "cover": "/covers/comentario-nt-tomo-1-mateo-marcos.jpg",
+    "cover": "/covers/comentario-doctrinal-nuevo-testamento-tomo-1-e29406.jpg",
     "description": "Preguntas y respuestas sobre el trasfondo histórico, cultural y doctrinal de los Evangelios de Mateo y Marcos, con comentario SUD.\n\nEl Tomo I del Comentario doctrinal del Nuevo Testamento acompaña la lectura de los Evangelios con el contexto que ayuda a entenderlos mejor. Editor General: Lucas Calveiro.",
     "amazonPrint": "",
     "amazonKindle": "",
@@ -23,7 +23,8 @@
     "languages": [
       "es",
       "pt"
-    ]
+    ],
+    "cover_pt": "/covers/comentario-doctrinal-nuevo-testamento-tomo-1-pt-ed22e3.jpg"
   },
   {
     "slug": "quien-es-quien-en-el-nuevo-testamento",
