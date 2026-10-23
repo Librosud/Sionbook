@@ -52,5 +52,30 @@
       "pt"
     ],
     "cover_pt": "/covers/quien-es-quien-en-el-nuevo-testamento-pt-f473d6.jpg"
+  },
+  {
+    "slug": "comentario-doctrinal-del-nuevo-testamento",
+    "title": "Comentario Doctrinal del Nuevo Testamento",
+    "author": "Lucas Calveiro",
+    "language": "Español",
+    "category": "Comentario Doctrinal",
+    "color": "#0a2a8a",
+    "cover": "/covers/comentario-doctrinal-del-nuevo-testamento-0b77ec.jpg",
+    "description": "",
+    "amazonPrint": "",
+    "amazonKindle": "",
+    "googlePlay": "",
+    "languages": [
+      "es",
+      "pt"
+    ],
+    "title_pt": "Comentário Doutrinal do Novo Testamento",
+    "slug_pt": "comentario-doutrinal-do-novo-testamento",
+    "subtitle": "Tomo 2 Lucas y Juan",
+    "subtitle_pt": "Tomo 2 Lucas e João",
+    "category_pt": "Comentário Doutrinal ",
+    "year": 2026,
+    "pages": 547,
+    "cover_pt": "/covers/comentario-doctrinal-del-nuevo-testamento-pt-170c9d.jpg"
   }
 ]
