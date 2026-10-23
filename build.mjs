@@ -123,8 +123,8 @@ for (const b of books) {
   for (const k of ['amazonPrint', 'amazonKindle', 'googlePlay']) {
     if (b[k] && !/^https:\/\//.test(b[k])) console.warn(`⚠ ${b.slug}: ${k} debería empezar por https://`);
   }
-  if (!b.description) console.warn(`⚠ ${b.slug}: sin descripción (Google necesita texto para indexar la ficha).`);
-  if (!b.description_pt) console.warn(`⚠ ${b.slug}: sin description_pt (la versión en portugués usará el texto en español).`);
+  if (!b.description && inLang(b, 'es')) console.warn(`⚠ ${b.slug}: sin descripción (Google necesita texto para indexar la ficha).`);
+  if (!b.description_pt && inLang(b, 'pt')) console.warn(`⚠ ${b.slug}: sin description_pt (la versión en portugués usará el texto en español).`);
 }
 
 for (const u of upcoming) {

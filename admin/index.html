@@ -80,6 +80,22 @@
   .login .err { color: var(--bad); font-size: 14px; min-height: 20px; margin: 10px 0 0; }
   .login pre { background: #f4f6fd; border: 1px solid var(--line); padding: 10px; border-radius: 8px; font-size: 12.5px; white-space: pre-wrap; }
   [hidden] { display: none !important; }
+  body[data-lang="es"] { --lc: #0090c8; --lc-bg: #e6f6fd; }
+  body[data-lang="pt"] { --lc: #0a7a3d; --lc-bg: #e7f6ee; }
+  .langsw { display: flex; gap: 4px; padding: 4px; background: var(--bg); border-radius: 12px; margin-left: 8px; }
+  .langsw button { border: 0; background: transparent; padding: 7px 14px; border-radius: 9px; font-weight: 700; color: var(--muted); gap: 7px; }
+  .langsw button[aria-pressed="true"] { background: #fff; color: var(--lc); box-shadow: 0 1px 6px #0a1f6b33; }
+  .langsw .cnt { font-size: 11px; background: #dfe6fb; color: var(--blue-2); border-radius: 999px; padding: 0 7px; }
+  .modeband { padding: 9px 24px; font-size: 14px; background: var(--lc-bg, #eef2ff); border-bottom: 3px solid var(--lc, var(--blue)); color: var(--ink); }
+  .modeband b { color: var(--lc, var(--blue)); }
+  .modehead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 3px solid var(--lc, var(--blue)); margin-bottom: 4px; }
+  .st { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .st.ok { background: #e1f5e9; color: #0a7a3d; } .st.miss { background: #fff4e0; color: #b45309; }
+  .meta-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 3px; }
+  .summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+  .pend { margin-top: 18px; padding-top: 6px; border-top: 1px dashed var(--line); }
+  .pend h3 { border: 0; padding: 0; margin: 8px 0 4px; }
+  .pitem { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; margin-top: 6px; border: 1px dashed var(--line); border-radius: 8px; background: #fafbff; font-size: 14px; }
   .segbar { display: flex; gap: 4px; padding: 3px; margin: 0 0 12px; background: var(--bg); border-radius: 10px; }
   .seg { flex: 1; justify-content: center; padding: 6px 8px; border: 0; background: transparent; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
   .seg.on { background: #fff; color: var(--blue); box-shadow: 0 1px 4px #0a1f6b33; }
@@ -101,6 +117,10 @@
 <header class="top">
   <img src="/brand/logo.png" alt="Sion Book">
   <h1>Panel de administración</h1>
+  <div class="langsw" id="langsw" role="group" aria-label="Idioma que estás editando">
+    <button type="button" data-l="es"><span class="lang-tag es">ES</span>Español<span class="cnt" data-l="es"></span></button>
+    <button type="button" data-l="pt"><span class="lang-tag pt">PT</span>Português<span class="cnt" data-l="pt"></span></button>
+  </div>
   <span class="spacer"></span>
   <span class="state" id="who" hidden></span>
   <span class="state" id="state">Todo guardado</span>
@@ -109,12 +129,13 @@
   <button id="logout" hidden>Salir</button>
 </header>
 <nav class="tabs" role="tablist" id="tabs">
-  <button role="tab" data-tab="books">Libros publicados</button>
+  <button role="tab" data-tab="books">Libros</button>
   <button role="tab" data-tab="upcoming">Próximas obras</button>
-  <button role="tab" data-tab="map">Mapa del sitio (ES / PT)</button>
+  <button role="tab" data-tab="map">Comparar ES / PT</button>
   <button role="tab" data-tab="site">Textos de la editorial</button>
   <button role="tab" data-tab="publish">Publicar en sionbook.com</button>
 </nav>
+<div class="modeband" id="modeband"></div>
 <main id="view"></main>
 <div id="toasts"></div>
 
@@ -188,24 +209,9 @@ function field(label, obj, key, { lang, type = 'text', hint, area, onchange, pla
   if (!options) input.value = obj[key] ?? (type === 'color' ? '#0a2a8a' : '');
   input.addEventListener('input', () => {
     obj[key] = type === 'number' ? input.value : input.value;
-    markDirty(); if (onchange) onchange(input.value);
+    markDirty(); refreshStatus(); if (onchange) onchange(input.value);
   });
   return h('label', { class: 'f' }, tag, input);
-}
-
-function whereBox(obj) {
-  if (!Array.isArray(obj.languages)) obj.languages = [...BOTH];
-  const box = (code, name) => {
-    const cb = h('input', { type: 'checkbox' });
-    cb.checked = obj.languages.includes(code);
-    cb.addEventListener('change', () => {
-      obj.languages = BOTH.filter((l) => (l === code ? cb.checked : obj.languages.includes(l)));
-      markDirty(); render(); // vuelve a pintar también el número de página de cada idioma
-    });
-    return h('label', {}, cb, h('span', { class: 'lang-tag ' + code }, code.toUpperCase()), name);
-  };
-  return h('div', {}, h('div', { class: 'where' }, box('es', 'Sitio en español'), box('pt', 'Sitio en português')),
-    h('p', { class: 'note' }, 'Elige en qué versión del sitio aparece. Si marcas solo una, en la otra no se muestra ni en el índice ni en el catálogo.'));
 }
 
 /* ---------- portadas ---------- */
@@ -250,45 +256,75 @@ function coverBox(obj, key, title, slugBase) {
         info)));
 }
 
-/* ---------- lista lateral ---------- */
-/* ---------- idiomas: el sitio en español y en português no tienen las mismas páginas ---------- */
-let langFilter = 'all';    // filtro de las listas: 'all' | 'es' | 'pt'
+/* ---------- idioma de trabajo: Español | Português ---------- */
+// El panel se usa "como el sitio": eliges un idioma y ves SOLO lo de ese idioma (sus libros, sus textos y lo que le falta).
+let L = (() => { try { return localStorage.getItem('sb_admin_lang') === 'pt' ? 'pt' : 'es'; } catch { return 'es'; } })();
+const OTHER = (l) => (l === 'es' ? 'pt' : 'es');
 const LANG_NAME = { es: 'español', pt: 'português' };
+const LANG_TITLE = { es: 'ESPAÑOL', pt: 'PORTUGUÊS' };
 const inLang = (o, l) => langsOf(o).includes(l);
-const visible = (kind) => data[kind].map((o, i) => i).filter((i) => langFilter === 'all' || inLang(data[kind][i], langFilter));
+const visible = (kind) => data[kind].map((o, i) => i).filter((i) => inLang(data[kind][i], L));
+const sfx = (k, l = L) => (l === 'pt' ? k + '_pt' : k);       // nombre del campo en cada idioma (title / title_pt)
+const has = (o, k) => String(o[k] ?? '').trim() !== '';
 const titleIn = (o, l) => (l === 'pt' && o.title_pt) || o.title || '(sin título)';
 // Número de página de un libro en cada idioma (1 = Inicio, 2 = Catálogo, luego los libros)
 const bookPage = (o, l) => (inLang(o, l) ? 3 + data.books.filter((b) => inLang(b, l)).indexOf(o) : null);
 
-function filterBar(kind) {
-  const count = (l) => data[kind].filter((o) => l === 'all' || inLang(o, l)).length;
-  const btn = (l, label) => h('button', { type: 'button', class: 'seg' + (langFilter === l ? ' on' : ''), 'aria-pressed': String(langFilter === l), onclick: () => {
-    langFilter = l; const v = visible(kind); if (v.length && !v.includes(sel[kind])) sel[kind] = v[0]; render();
-  } }, label, h('span', { class: 'cnt' }, count(l)));
-  return h('div', { class: 'segbar', role: 'group', 'aria-label': 'Ver las páginas de un idioma' }, btn('all', 'Todos'), btn('es', 'Español'), btn('pt', 'Português'));
+// Qué falta por subir/completar en el idioma activo
+function missingFor(o, kind, l = L) {
+  const m = [];
+  if (!has(o, sfx('title', l))) m.push('título');
+  const pairs = kind === 'books' ? [['subtitle', 'subtítulo'], ['category', 'categoría']] : [['subtitle', 'subtítulo'], ['note', 'frase corta']];
+  for (const [k, label] of pairs) if (!has(o, sfx(k, l)) && has(o, sfx(k, OTHER(l)))) m.push(label);   // lo que ya existe en el otro idioma
+  if (kind === 'books') {
+    if (!has(o, sfx('description', l))) m.push('sinopsis');
+    if (!o.amazonPrint && !o.amazonKindle && !o.googlePlay) m.push('enlaces de compra');
+  }
+  if (!has(o, 'cover') && !(l === 'pt' && has(o, 'cover_pt'))) m.push('portada');
+  return m;
+}
+const statusChip = (miss) => (miss.length ? h('span', { class: 'st miss' }, 'Falta: ' + miss.join(', ')) : h('span', { class: 'st ok' }, '✓ Completo'));
+
+// Al escribir: actualiza al instante la lista y la etiqueta "Falta: …" / "✓ Completo"
+function refreshStatus() {
+  if (!data || (tab !== 'books' && tab !== 'upcoming')) return;
+  const o = data[tab][sel[tab]]; if (!o) return;
+  const chip = document.querySelector('.modehead .st'); if (chip) chip.replaceWith(statusChip(missingFor(o, tab)));
+  renderList();
+}
+function syncLangUI() {
+  document.body.dataset.lang = L;
+  document.querySelectorAll('#langsw button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.l === L)));
+  const n = (l) => (data ? data.books.filter((b) => inLang(b, l)).length : 0);
+  document.querySelectorAll('#langsw .cnt').forEach((c) => { c.textContent = n(c.dataset.l); });
+}
+function setLang(l) {
+  L = l; try { localStorage.setItem('sb_admin_lang', l); } catch {}
+  syncLangUI(); render();
 }
 
+/* ---------- lista lateral ---------- */
 function renderList() {
   const box = $('#listbox'); if (!box) return;
   const arr = data[tab]; const vis = visible(tab); const list = h('div', { class: 'list' });
   vis.forEach((i, pos) => {
     const o = arr[i];
-    const th = h('div', { class: 'thumb' }); if (o.cover) th.style.backgroundImage = `url("${urlFor(o.cover)}")`; else th.style.background = o.color || '#0a2a8a';
+    const th = h('div', { class: 'thumb' }); const img = (L === 'pt' && o.cover_pt) || o.cover;
+    if (img) th.style.backgroundImage = `url("${urlFor(img)}")`; else th.style.background = o.color || '#0a2a8a';
     th.style.backgroundSize = 'cover';
-    const ls = langsOf(o);
-    const pg = tab === 'books' && langFilter !== 'all' ? bookPage(o, langFilter) : null;
+    const pg = tab === 'books' ? bookPage(o, L) : null;
     list.append(h('div', { class: 'item', 'aria-current': String(i === sel[tab]), onclick: () => { sel[tab] = i; render(); } },
       th,
-      h('div', {}, h('b', {}, langFilter === 'all' ? (o.title || '(sin título)') : titleIn(o, langFilter)), h('small', {}, o.author || ''),
-        h('div', {}, BOTH.map((l) => h('span', { class: 'badge' + (ls.includes(l) ? '' : ' off') }, l.toUpperCase())), pg ? h('span', { class: 'pgnum' }, `pág. ${pg}`) : null)),
+      h('div', {}, h('b', {}, titleIn(o, L)), h('small', {}, o.author || ''),
+        h('div', { class: 'meta-row' }, statusChip(missingFor(o, tab)), pg ? h('span', { class: 'pgnum' }, `pág. ${pg}`) : null)),
       h('div', { class: 'mv' },
         h('button', { class: 'small', title: 'Subir', disabled: pos === 0, onclick: (e) => { e.stopPropagation(); move(i, -1); } }, '▲'),
         h('button', { class: 'small', title: 'Bajar', disabled: pos === vis.length - 1, onclick: (e) => { e.stopPropagation(); move(i, 1); } }, '▼'))));
   });
-  if (!vis.length) list.append(h('div', { class: 'empty' }, langFilter === 'all' ? 'Todavía no hay nada aquí.' : `Todavía no hay nada en el sitio en ${LANG_NAME[langFilter]}.`));
+  if (!vis.length) list.append(h('div', { class: 'empty' }, `Todavía no hay nada en el sitio en ${LANG_NAME[L]}.`));
   box.replaceChildren(list);
 }
-// Mover respeta el filtro: se intercambia con el vecino visible (así el orden de cada idioma queda como lo ves)
+// Mover se intercambia con el vecino de ESTE idioma (así el orden de cada idioma queda como lo ves)
 function move(i, d) {
   const arr = data[tab]; const vis = visible(tab); const j = vis[vis.indexOf(i) + d];
   if (j === undefined) return;
@@ -300,145 +336,157 @@ function sitePages(l) {
   const es = l === 'es';
   const up = data.upcoming.filter((u) => inLang(u, l));
   const pages = [{ label: es ? 'Inicio' : 'Início' }, { label: 'Catálogo' }];
-  data.books.filter((b) => inLang(b, l)).forEach((b) => pages.push({ label: titleIn(b, l), book: b, only: !inLang(b, l === 'es' ? 'pt' : 'es') }));
-  if (up.length) pages.push({ label: 'Próximas obras', note: `${up.length} ${up.length === 1 ? 'obra' : 'obras'}`, only: !data.upcoming.some((u) => inLang(u, l === 'es' ? 'pt' : 'es')) });
+  data.books.filter((b) => inLang(b, l)).forEach((b) => pages.push({ label: titleIn(b, l), book: b, only: !inLang(b, OTHER(l)) }));
+  if (up.length) pages.push({ label: 'Próximas obras', note: `${up.length} ${up.length === 1 ? 'obra' : 'obras'}`, only: !data.upcoming.some((u) => inLang(u, OTHER(l))) });
   pages.push({ label: es ? 'La editorial' : 'A editora' }, { label: es ? 'Contacto' : 'Contato' }, { label: es ? 'Política de privacidad' : 'Política de privacidade' });
   return pages;
 }
 function mapView() {
-  const cols = BOTH.map((l) => ({ l, pages: sitePages(l) }));
+  const cols = ['es', 'pt'].map((l) => ({ l, pages: sitePages(l) }));
   const diff = Math.abs(cols[0].pages.length - cols[1].pages.length);
   const col = ({ l, pages }) => h('div', { class: 'card' },
     h('h2', {}, h('span', { class: 'lang-tag ' + l }, l.toUpperCase()), `Sitio en ${LANG_NAME[l]}`),
     h('div', { class: 'stat' }, h('div', {}, h('b', {}, pages.length), 'páginas')),
-    h('ol', { class: 'map' }, pages.map((p, i) => h('li', { class: p.book ? 'is-link' : '', onclick: p.book ? () => { tab = 'books'; langFilter = l; sel.books = data.books.indexOf(p.book); render(); } : null },
+    h('ol', { class: 'map' }, pages.map((p, i) => h('li', { class: p.book ? 'is-link' : '', onclick: p.book ? () => { L = l; try { localStorage.setItem('sb_admin_lang', l); } catch {} tab = 'books'; sel.books = data.books.indexOf(p.book); syncLangUI(); render(); } : null },
       h('span', { class: 'n' }, i + 1), h('span', { class: 't' }, p.label, p.note ? h('small', {}, ` · ${p.note}`) : null),
       p.only ? h('span', { class: 'only' }, `solo en ${l.toUpperCase()}`) : null))));
   return h('div', {},
     h('p', { class: 'note', style: 'margin:0 0 14px' }, diff || cols.some((c) => c.pages.some((p) => p.only))
-      ? `El sitio en español (${cols[0].pages.length} páginas) y el sitio en português (${cols[1].pages.length} páginas) no tienen las mismas páginas. Las marcadas “solo en ES / PT” existen en un único idioma. Toca un libro para editarlo.`
+      ? `El sitio en español (${cols[0].pages.length} páginas) y el sitio en português (${cols[1].pages.length} páginas) no tienen las mismas páginas. Las marcadas “solo en ES / PT” existen en un único idioma. Toca un libro para editarlo en su idioma.`
       : 'Los dos idiomas tienen las mismas páginas. Toca un libro para editarlo.'),
     h('div', { class: 'grid2' }, cols.map(col)));
 }
 
-/* ---------- editor de libro / próxima obra ---------- */
+/* ---------- editor de libro / próxima obra (en el idioma activo) ---------- */
 function editor(kind) {
   const arr = data[kind]; const o = arr[sel[kind]];
-  if (!o || !visible(kind).includes(sel[kind])) return h('div', { class: 'card empty' }, langFilter !== 'all' ? `No hay nada en el sitio en ${LANG_NAME[langFilter]} todavía. Añade uno con el botón de la izquierda.` : kind === 'books' ? 'Añade tu primer libro con el botón de la izquierda.' : 'Añade una próxima obra con el botón de la izquierda.');
+  const noun = kind === 'books' ? 'libros' : 'próximas obras';
+  if (!o || !visible(kind).includes(sel[kind])) return h('div', { class: 'card empty' }, `Todavía no hay ${noun} en el sitio en ${LANG_NAME[L]}. Añade uno nuevo, o trae uno del otro idioma desde la lista de la izquierda.`);
   const isBook = kind === 'books';
-  const slugField = () => {
-    const f = field('Dirección web (español)', o, 'slug', { hint: 'solo minúsculas, números y guiones', onchange: () => { o._slugTouched = true; } });
-    return f;
+  const miss = missingFor(o, kind);
+  const k = (base) => sfx(base);
+
+  // Al crear algo nuevo se generan solos el título base y la dirección web
+  const onTitle = (v) => {
+    if (o._new) {
+      if (L === 'pt' && !o._titleEsTouched) o.title = v;                                      // el título base (obligatorio) sigue al texto en portugués si aún no existe en español
+      if (isBook) {
+        if (L === 'es' && !o._slugTouched) { o.slug = slugify(v); const el = $('#slugbox input'); if (el) el.value = o.slug; }
+        if (L === 'pt') {
+          if (!o._slugTouched) o.slug = slugify(v);
+          if (!o._slugPtTouched) { o.slug_pt = slugify(v); const el = $('#slugbox input'); if (el) el.value = o.slug_pt; }
+        }
+      }
+    }
+    renderList();
   };
-  const onTitle = (v) => { if (isBook && o._new && !o._slugTouched) { o.slug = slugify(v); const el = $('#slugbox input'); if (el) el.value = o.slug; } renderList(); };
-  const onTitlePt = (v) => { if (isBook && o._new && !o._slugPtTouched) { o.slug_pt = slugify(v); const el = $('#slugptbox input'); if (el) el.value = o.slug_pt; } };
 
   const card = h('div', { class: 'card' });
   card.append(
-    h('div', { class: 'pginfo' }, BOTH.map((l) => {
-      const on = inLang(o, l);
-      const text = !on ? `No aparece en el sitio en ${LANG_NAME[l]}` : isBook ? `Página ${bookPage(o, l)} del sitio en ${LANG_NAME[l]}` : `Aparece en “Próximas obras” del sitio en ${LANG_NAME[l]}`;
-      return h('span', { class: 'pg' + (on ? '' : ' off') }, h('span', { class: 'lang-tag ' + l }, l.toUpperCase()), text);
-    })),
-    h('h3', {}, 'Dónde aparece'), whereBox(o),
-    h('h3', {}, 'Título y datos'),
+    h('div', { class: 'modehead' }, h('span', { class: 'lang-tag ' + L }, L.toUpperCase()), h('b', {}, `Editando en ${LANG_NAME[L]}`), statusChip(miss),
+      isBook ? h('span', { class: 'pgnum' }, `Página ${bookPage(o, L)} del sitio en ${LANG_NAME[L]}`) : h('span', { class: 'pgnum' }, `Aparece en “Próximas obras” del sitio en ${LANG_NAME[L]}`)),
+    h('h3', {}, `Texto en ${LANG_NAME[L]}`),
     h('div', { class: 'grid2' },
-      field('Título', o, 'title', { lang: 'es', onchange: onTitle }),
-      field('Título', o, 'title_pt', { lang: 'pt', hint: 'si lo dejas vacío usa el de español', onchange: onTitlePt }),
-      field('Subtítulo', o, 'subtitle', { lang: 'es' }),
-      field('Subtítulo', o, 'subtitle_pt', { lang: 'pt' }),
-      ...(isBook ? [
-        field('Categoría', o, 'category', { lang: 'es', placeholder: 'Ej.: Comentario doctrinal' }),
-        field('Categoría', o, 'category_pt', { lang: 'pt' })
-      ] : [
-        field('Frase corta', o, 'note', { lang: 'es', hint: 'aparece bajo el subtítulo' }),
-        field('Frase corta', o, 'note_pt', { lang: 'pt' }),
-        field('Fecha estimada', o, 'when', { lang: 'es', placeholder: 'Ej.: otoño 2026' }),
-        field('Fecha estimada', o, 'when_pt', { lang: 'pt', placeholder: 'Ex.: outono de 2026' })
-      ])),
-    h('div', { class: 'grid3', style: 'margin-top:14px' },
+      field('Título', o, k('title'), { onchange: onTitle }),
+      field('Subtítulo', o, k('subtitle')),
+      ...(isBook
+        ? [field('Categoría', o, k('category'), { placeholder: L === 'es' ? 'Ej.: Comentario doctrinal' : 'Ex.: Comentário doutrinário' })]
+        : [field('Frase corta', o, k('note'), { hint: 'aparece bajo el subtítulo' }), field('Fecha estimada', o, k('when'), { placeholder: L === 'es' ? 'Ej.: otoño 2026' : 'Ex.: outono de 2026' })])));
+  if (isBook) card.append(h('div', { style: 'margin-top:14px' }, field('Sinopsis', o, k('description'), { area: true, hint: 'separa los párrafos con una línea en blanco' })));
+
+  // Portada: en español la portada general; en português una propia (opcional) o la misma del español
+  card.append(h('h3', {}, 'Portada'));
+  const base = () => (isBook ? o.slug : 'proxima-' + slugify(o.title));
+  if (L === 'es') {
+    card.append(coverBox(o, 'cover', 'Portada (se usa también en português si no subes otra allí)', () => base()),
+      h('p', { class: 'note' }, 'Ideal: 800×1200 px (proporción 2:3), JPG, PNG o WebP.'));
+  } else {
+    card.append(coverBox(o, 'cover_pt', 'Portada para el sitio en português', () => base() + '-pt'),
+      h('p', { class: 'note' }, o.cover ? 'Es opcional: si no subes ninguna, el sitio en português usa la misma portada que el español.' : 'Todavía no hay portada en ninguno de los dos idiomas.'));
+  }
+
+  // Datos que son iguales en los dos idiomas
+  card.append(h('h3', {}, 'Datos comunes (iguales en español y português)'),
+    h('div', { class: 'grid3' },
       field('Autor', o, 'author'),
-      ...(isBook ? [
-        field('Idioma del libro', o, 'language', { options: ['Español', 'Português'] }),
-        field('Año', o, 'year', { type: 'number' }),
-        field('Páginas', o, 'pages', { type: 'number' }),
-        field('ISBN', o, 'isbn')
-      ] : []),
-      field('Color de la tapa', o, 'color', { type: 'color', hint: 'si no hay imagen' })),
-    h('h3', {}, 'Portada'),
-    h('div', { class: 'covers' },
-      coverBox(o, 'cover', 'Portada (se usa en ambos idiomas)', () => (isBook ? o.slug : 'proxima-' + slugify(o.title))),
-      coverBox(o, 'cover_pt', 'Portada para português (opcional)', () => (isBook ? o.slug : 'proxima-' + slugify(o.title)) + '-pt')),
-    h('p', { class: 'note' }, 'Ideal: 800×1200 px (proporción 2:3), JPG, PNG o WebP. La portada en portugués solo hace falta si tienes una edición distinta.')
-  );
+      ...(isBook ? [field('Idioma del libro', o, 'language', { options: ['Español', 'Português'] }), field('Año', o, 'year', { type: 'number' }), field('Páginas', o, 'pages', { type: 'number' }), field('ISBN', o, 'isbn')] : []),
+      field('Color de la tapa', o, 'color', { type: 'color', hint: 'si no hay imagen' })));
   if (isBook) {
-    card.append(
-      h('h3', {}, 'Sinopsis'),
-      h('div', { class: 'grid2' },
-        field('Sinopsis', o, 'description', { lang: 'es', area: true, hint: 'separa los párrafos con una línea en blanco' }),
-        field('Sinopsis', o, 'description_pt', { lang: 'pt', area: true })),
-      h('h3', {}, 'Dónde comprarlo'),
+    card.append(h('h3', {}, 'Dónde comprarlo (iguales en los dos idiomas)'),
       h('div', { class: 'grid3' },
         field('Amazon (papel)', o, 'amazonPrint', { placeholder: 'https://…' }),
         field('Amazon (Kindle)', o, 'amazonKindle', { placeholder: 'https://…' }),
         field('Google Play Libros', o, 'googlePlay', { placeholder: 'https://…' })),
       h('p', { class: 'note' }, 'Los enlaces vacíos se muestran como “Próximamente” / “Em breve”.'),
-      h('details', { class: 'adv', style: 'margin-top:18px' }, h('summary', {}, 'Opciones avanzadas (direcciones web)'),
-        h('div', { class: 'grid2', style: 'margin-top:10px' },
-          h('div', { id: 'slugbox' }, field('Dirección web (español)', o, 'slug', { hint: 'ej.: mi-libro', onchange: () => { o._slugTouched = true; } })),
-          h('div', { id: 'slugptbox' }, field('Dirección web (português)', o, 'slug_pt', { hint: 'ej.: meu-livro', onchange: () => { o._slugPtTouched = true; } }))),
-        h('p', { class: 'note' }, 'Se generan solas a partir del título al crear el libro. Cambiarlas en un libro ya publicado cambia su dirección en Google.'))
-    );
+      h('details', { class: 'adv', style: 'margin-top:18px' }, h('summary', {}, `Opciones avanzadas (dirección web en ${LANG_NAME[L]})`),
+        h('div', { id: 'slugbox', style: 'margin-top:10px;max-width:420px' }, field(`Dirección web (${LANG_NAME[L]})`, o, sfx('slug'), { hint: 'solo minúsculas, números y guiones', onchange: () => { if (L === 'es') o._slugTouched = true; else o._slugPtTouched = true; } })),
+        h('p', { class: 'note' }, 'Se genera sola a partir del título al crear el libro. Cambiarla en un libro ya publicado cambia su dirección en Google.')));
   }
-  card.append(h('h3', {}, 'Eliminar'),
-    h('button', { class: 'danger', onclick: () => {
-      if (!confirm(`¿Eliminar “${o.title || 'sin título'}” de la lista? Podrás recuperarlo desde las copias en admin/.backups.`)) return;
+
+  // Visibilidad en ESTE idioma + eliminar
+  const show = h('input', { type: 'checkbox' }); show.checked = true;
+  show.addEventListener('change', () => {
+    if (!show.checked && langsOf(o).length === 1) { show.checked = true; toast('Es lo único que lo muestra. Para quitarlo de todo el sitio usa “Eliminar”.', 'bad'); return; }
+    o.languages = langsOf(o).filter((x) => x !== L); markDirty(); render();
+  });
+  card.append(h('h3', {}, 'Visibilidad'),
+    h('div', { class: 'where' }, h('label', {}, show, h('span', { class: 'lang-tag ' + L }, L.toUpperCase()), `Mostrar en el sitio en ${LANG_NAME[L]}`)),
+    h('p', { class: 'note' }, `Si lo desmarcas, deja de aparecer en el sitio en ${LANG_NAME[L]} (pasa a “Solo en ${LANG_NAME[OTHER(L)]}” en la lista) y no se borra nada.`),
+    h('button', { class: 'danger', style: 'margin-top:10px', onclick: () => {
+      if (!confirm(`¿Eliminar “${o.title || 'sin título'}” de TODO el sitio (español y português)? Podrás recuperarlo desde las copias en admin/.backups.`)) return;
       arr.splice(sel[kind], 1); sel[kind] = Math.max(0, sel[kind] - 1); markDirty(); render();
-    } }, isBook ? 'Eliminar este libro' : 'Eliminar esta obra'));
+    } }, isBook ? 'Eliminar este libro de todo el sitio' : 'Eliminar esta obra de todo el sitio'));
   return card;
 }
 
 function listPane(kind) {
+  const isBook = kind === 'books';
   const add = h('button', { class: 'primary', style: 'width:100%;justify-content:center;margin-bottom:12px', onclick: () => {
-    // Si estás viendo un solo idioma, lo nuevo nace solo en ese idioma
-    const langs = langFilter === 'all' ? [...BOTH] : [langFilter];
-    const base = kind === 'books'
-      ? { slug: '', title: 'Nuevo libro', author: data.site.editor || '', language: langFilter === 'pt' ? 'Português' : 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', languages: langs, _new: true }
-      : { title: 'Nueva obra', author: data.site.editor || '', color: '#0a2a8a', cover: '', languages: langs, _new: true };
+    // Lo nuevo nace solo en el idioma que estás viendo
+    const base = isBook
+      ? { slug: '', title: '', author: data.site.editor || '', language: L === 'pt' ? 'Português' : 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', languages: [L], _new: true }
+      : { title: '', author: data.site.editor || '', color: '#0a2a8a', cover: '', languages: [L], _new: true };
     data[kind].push(base); sel[kind] = data[kind].length - 1; markDirty(); render();
-  } }, (kind === 'books' ? '＋ Añadir libro' : '＋ Añadir próxima obra') + (langFilter === 'all' ? '' : ` (${LANG_NAME[langFilter]})`));
-  return h('div', { class: 'card' }, h('h2', {}, kind === 'books' ? 'Libros publicados' : 'Próximas obras'), filterBar(kind), add, h('div', { id: 'listbox' }),
-    h('p', { class: 'note' }, langFilter === 'all' ? 'Aquí ves todo. Elige Español o Português para ver y ordenar solo las páginas de ese idioma.' : `Orden del sitio en ${LANG_NAME[langFilter]}. Usa ▲ ▼ para cambiarlo; el otro idioma no se toca.`));
+  } }, `${isBook ? '＋ Añadir libro' : '＋ Añadir próxima obra'} en ${LANG_NAME[L]}`);
+
+  const vis = visible(kind);
+  const incomplete = vis.filter((i) => missingFor(data[kind][i], kind).length).length;
+  const head = h('p', { class: 'summary' }, `${vis.length} ${isBook ? (vis.length === 1 ? 'libro' : 'libros') : (vis.length === 1 ? 'obra' : 'obras')} en ${LANG_NAME[L]}`,
+    incomplete ? h('span', { class: 'st miss' }, `${incomplete} por completar`) : (vis.length ? h('span', { class: 'st ok' }, '✓ todo completo') : null));
+
+  // Lo que existe solo en el otro idioma y se puede traer a este
+  const pend = data[kind].map((o, i) => i).filter((i) => !inLang(data[kind][i], L));
+  const pendBox = pend.length ? h('div', { class: 'pend' }, h('h3', {}, `Solo en ${LANG_NAME[OTHER(L)]} (${pend.length})`),
+    h('p', { class: 'note' }, `Todavía no están en el sitio en ${LANG_NAME[L]}. Puedes traerlos y completar su texto.`),
+    pend.map((i) => h('div', { class: 'pitem' }, h('span', {}, titleIn(data[kind][i], OTHER(L))),
+      h('button', { class: 'small', onclick: () => { data[kind][i].languages = [...langsOf(data[kind][i]), L]; sel[kind] = i; markDirty(); render(); } }, `Añadir al sitio en ${LANG_NAME[L]}`)))) : null;
+
+  return h('div', { class: 'card' }, h('h2', {}, `${isBook ? 'Libros' : 'Próximas obras'} en ${LANG_NAME[L]}`), add, head, h('div', { id: 'listbox' }),
+    h('p', { class: 'note' }, `Este es el orden del sitio en ${LANG_NAME[L]}. Usa ▲ ▼ para cambiarlo; el otro idioma no se toca.`), pendBox);
 }
 
-/* ---------- textos de la editorial ---------- */
+/* ---------- textos de la editorial (del idioma activo) ---------- */
 function siteView() {
-  const s = data.site;
-  const para = (lang) => {
-    const o = s[lang]; const ta = h('textarea', {}); ta.value = (o.about || []).join('\n\n');
-    ta.addEventListener('input', () => { o.about = ta.value.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean); markDirty(); });
-    return h('label', { class: 'f' }, h('span', {}, h('span', { class: 'lang-tag ' + lang }, lang.toUpperCase()), 'Texto de “La editorial”', h('span', { class: 'hint' }, ' · párrafos separados por una línea en blanco')), ta);
-  };
-  const col = (lang) => h('div', {},
-    field('Frase principal', s[lang], 'tagline', { lang }),
-    h('div', { style: 'height:14px' }),
-    field('Descripción corta', s[lang], 'description', { lang, area: true }),
-    h('div', { style: 'height:14px' }),
-    field('Cargo del editor', s[lang], 'editorTitle', { lang }),
-    h('div', { style: 'height:14px' }),
-    para(lang),
-    h('div', { style: 'height:14px' }),
-    field('Texto de Contacto', s[lang], 'contactIntro', { lang, area: true }));
+  const s = data.site; const o = s[L];
+  const ta = h('textarea', {}); ta.value = (o.about || []).join('\n\n');
+  ta.addEventListener('input', () => { o.about = ta.value.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean); markDirty(); });
   return h('div', { class: 'card' },
-    h('h3', {}, 'Datos generales'),
+    h('h3', {}, `Textos del sitio en ${LANG_NAME[L]}`),
+    h('div', { class: 'grid2' },
+      h('div', {},
+        field('Frase principal', o, 'tagline'), h('div', { style: 'height:14px' }),
+        field('Descripción corta', o, 'description', { area: true }), h('div', { style: 'height:14px' }),
+        field('Cargo del editor', o, 'editorTitle')),
+      h('div', {},
+        h('label', { class: 'f' }, h('span', {}, 'Texto de “La editorial”', h('span', { class: 'hint' }, ' · párrafos separados por una línea en blanco')), ta), h('div', { style: 'height:14px' }),
+        field('Texto de Contacto', o, 'contactIntro', { area: true }))),
+    h('h3', {}, 'Datos generales (iguales en español y português)'),
     h('div', { class: 'grid2' }, field('Editor', s, 'editor'), field('Correo de contacto', s, 'email', { type: 'email' })),
-    h('h3', {}, 'Formulario de contacto'),
+    h('h3', {}, 'Formulario de contacto (el mismo en los dos idiomas)'),
     h('div', { class: 'grid2' },
       field('Enlace del formulario', s, 'contactEndpoint', { hint: 'Formspree o Web3Forms', placeholder: 'https://formspree.io/f/xxxxxxxx' }),
       field('Clave pública de Web3Forms', s, 'contactAccessKey', { hint: 'solo si usas Web3Forms' })),
-    h('p', { class: 'note' }, 'Mientras el enlace esté vacío, la página de contacto solo muestra el botón de correo. Al pegarlo, aparece el formulario.'),
-    h('h3', {}, 'Textos por idioma'),
-    h('div', { class: 'grid2' }, col('es'), col('pt')));
+    h('p', { class: 'note' }, 'Mientras el enlace esté vacío, la página de contacto solo muestra el botón de correo. Al pegarlo, aparece el formulario.'));
 }
 
 /* ---------- publicar ---------- */
@@ -469,8 +517,23 @@ function publishView() {
 }
 
 /* ---------- render ---------- */
+function renderBand() {
+  const band = $('#modeband'); if (!band || !data) return;
+  const texts = {
+    books: [`Estás editando el sitio en `, LANG_TITLE[L], ` — aquí ves solo los libros de ese idioma, lo que ya tienen y lo que falta.`],
+    upcoming: [`Estás editando el sitio en `, LANG_TITLE[L], ` — solo las próximas obras que se muestran en ese idioma.`],
+    site: [`Estás editando el sitio en `, LANG_TITLE[L], ` — los textos de la editorial y de contacto en ese idioma.`],
+    map: ['Comparando los dos idiomas', '', ' — cuántas páginas tiene cada sitio y qué existe en uno solo.'],
+    publish: ['Publicar', '', ' — afecta a los dos idiomas a la vez.']
+  }[tab] || ['', '', ''];
+  band.replaceChildren(texts[0], h('b', {}, texts[1]), texts[2]);
+  const cross = tab === 'map' || tab === 'publish';
+  band.style.setProperty('--lc', cross ? 'var(--blue)' : ''); band.style.background = cross ? '#eef2ff' : '';
+  document.getElementById('langsw').style.opacity = cross ? '.55' : '';
+}
 function render() {
   document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  syncLangUI(); renderBand();
   view.replaceChildren();
   if (tab === 'books' || tab === 'upcoming') {
     const vis = visible(tab); if (vis.length && !vis.includes(sel[tab])) sel[tab] = vis[0];
@@ -536,6 +599,8 @@ function renderNotConfigured(s) {
 }
 function applyMode(s) {
   cloud = s.mode === 'cloud';
+  const showChrome = !cloud || !!s.authenticated;
+  $('#langsw').hidden = !showChrome; $('#modeband').hidden = !showChrome;
   if (!cloud) return;
   $('#site-link').href = 'https://www.sionbook.com';
   $('#save').textContent = 'Guardar y publicar';
@@ -549,6 +614,8 @@ $('#logout').addEventListener('click', async () => {
   try { await api('/api/logout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' }); } catch {}
   dirty = false; location.reload();
 });
+
+document.querySelectorAll('#langsw button').forEach((b) => b.addEventListener('click', () => { if (L !== b.dataset.l) setLang(b.dataset.l); }));
 
 async function start() {
   const s = await api('/api/session');
