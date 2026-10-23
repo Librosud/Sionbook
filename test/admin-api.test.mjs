@@ -177,3 +177,10 @@ test('logout borra la cookie', async () => {
   const r = await call(h, { method: 'POST', action: 'logout', headers: { ...post, cookie } });
   assert.match(r.headers['set-cookie'], /Max-Age=0/);
 });
+
+test('validate: el autor es opcional (solo el título es obligatorio)', () => {
+  const site = { es: { about: [] }, pt: { about: [] } };
+  validate({ books: [{ slug: 'a', title: 't', author: '', languages: ['es'] }], upcoming: [{ title: 'u', languages: ['pt'] }], site });
+  assert.throws(() => validate({ books: [{ slug: 'a', title: '', languages: ['es'] }], upcoming: [], site }));
+  assert.throws(() => validate({ books: [], upcoming: [{ title: '', languages: ['es'] }], site }));
+});

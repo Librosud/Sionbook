@@ -408,7 +408,7 @@ function editor(kind) {
   // Datos que son iguales en los dos idiomas
   card.append(h('h3', {}, 'Datos comunes (iguales en español y português)'),
     h('div', { class: 'grid3' },
-      field('Autor', o, 'author'),
+      field('Autor', o, 'author', { hint: 'opcional: déjalo vacío si no quieres mostrar autor' }),
       ...(isBook ? [field('Idioma del libro', o, 'language', { options: ['Español', 'Português'] }), field('Año', o, 'year', { type: 'number' }), field('Páginas', o, 'pages', { type: 'number' }), field('ISBN', o, 'isbn')] : []),
       field('Color de la tapa', o, 'color', { type: 'color', hint: 'si no hay imagen' })));
   if (isBook) {
@@ -444,8 +444,8 @@ function listPane(kind) {
   const add = h('button', { class: 'primary', style: 'width:100%;justify-content:center;margin-bottom:12px', onclick: () => {
     // Lo nuevo nace solo en el idioma que estás viendo
     const base = isBook
-      ? { slug: '', title: '', author: data.site.editor || '', language: L === 'pt' ? 'Português' : 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', languages: [L], _new: true }
-      : { title: '', author: data.site.editor || '', color: '#0a2a8a', cover: '', languages: [L], _new: true };
+      ? { slug: '', title: '', author: '', language: L === 'pt' ? 'Português' : 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', languages: [L], _new: true }
+      : { title: '', author: '', color: '#0a2a8a', cover: '', languages: [L], _new: true };
     data[kind].push(base); sel[kind] = data[kind].length - 1; markDirty(); render();
   } }, `${isBook ? '＋ Añadir libro' : '＋ Añadir próxima obra'} en ${LANG_NAME[L]}`);
 

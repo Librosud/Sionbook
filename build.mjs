@@ -39,7 +39,7 @@ const T = {
     soon: 'Próximamente', coverOf: 'Portada de', newTab: 'se abre en una pestaña nueva',
     stores: { amazonPrint: 'Papel en', amazonKindle: 'Kindle en', googlePlay: 'Ebook en' }, playName: 'Google Play Libros',
     meta: { author: 'Autor', category: 'Categoría', language: 'Idioma', year: 'Año', pages: 'Páginas', isbn: 'ISBN' },
-    bookFallback: (b, title) => `${title}, de ${b.author}. Cómpralo en papel, Kindle o Google Play Libros.`,
+    bookFallback: (b, title) => `${title}${b.author ? ', de ' + b.author : ''}. Cómpralo en papel, Kindle o Google Play Libros.`,
     upcLead: 'Los libros que estamos preparando. Cuando se publiquen, los encontrarás en el catálogo con enlaces a Amazon y Google Play Libros.',
     upcDesc: (list) => `Próximas obras de ${site.name}: ${list}.`, seeCatalog: 'Ver el catálogo →', exploreCat: 'Explora el catálogo →',
     aboutTitle: 'La editorial', aboutDesc: `Conoce ${site.name}, editorial independiente de libros en español y portugués dirigida por ${site.editor}.`,
@@ -63,7 +63,7 @@ const T = {
     soon: 'Em breve', coverOf: 'Capa de', newTab: 'abre em uma nova aba',
     stores: { amazonPrint: 'Papel na', amazonKindle: 'Kindle na', googlePlay: 'Ebook no' }, playName: 'Google Play Livros',
     meta: { author: 'Autor', category: 'Categoria', language: 'Idioma', year: 'Ano', pages: 'Páginas', isbn: 'ISBN' },
-    bookFallback: (b, title) => `${title}, de ${b.author}. Compre em papel, Kindle ou Google Play Livros.`,
+    bookFallback: (b, title) => `${title}${b.author ? ', de ' + b.author : ''}. Compre em papel, Kindle ou Google Play Livros.`,
     upcLead: 'Os livros que estamos preparando. Quando forem publicados, você os encontrará no catálogo com links para a Amazon e o Google Play Livros.',
     upcDesc: (list) => `Próximas obras da ${site.name}: ${list}.`, seeCatalog: 'Ver o catálogo →', exploreCat: 'Explore o catálogo →',
     aboutTitle: 'A editora', aboutDesc: `Conheça a ${site.name}, editora independente de livros em espanhol e português dirigida por ${site.editor}.`,
@@ -119,7 +119,7 @@ for (const b of books) {
   slugs.add(b.slug);
   if (b.slug_pt && !/^[a-z0-9-]+$/.test(b.slug_pt)) throw new Error(`Libro ${b.slug}: slug_pt inválido (solo a-z, 0-9 y guiones).`);
   if (!b.title_pt) console.warn(`⚠ ${b.slug}: sin title_pt (la versión en portugués usará el título en español).`);
-  if (!b.title || !b.author) throw new Error(`Libro ${b.slug}: faltan título o autor.`);
+  if (!b.title) throw new Error(`Libro ${b.slug}: falta el título.`);
   for (const k of ['amazonPrint', 'amazonKindle', 'googlePlay']) {
     if (b[k] && !/^https:\/\//.test(b[k])) console.warn(`⚠ ${b.slug}: ${k} debería empezar por https://`);
   }
@@ -128,7 +128,7 @@ for (const b of books) {
 }
 
 for (const u of upcoming) {
-  if (!u.title || !u.author) throw new Error(`Próxima obra "${u.title || '?'}": faltan título o autor.`);
+  if (!u.title) throw new Error(`Próxima obra sin título.`);
 }
 
 /* ---------- piezas visuales (comunes) ---------- */
@@ -235,18 +235,18 @@ function buildLang(lang) {
       return `<span ${c}${decorative ? ' aria-hidden="true"' : ''}><img src="${esc(img)}" alt="${altText}" width="400" height="600" loading="lazy" decoding="async"></span>`;
     }
     const a11y = decorative ? 'aria-hidden="true"' : `role="img" aria-label="${t.coverOf} ${esc(title)}"`;
-    return `<span ${c} ${a11y}><span class="cover-frame"><span><span class="cover-title">${esc(title)}</span>${sub ? `<span class="cover-sub" style="display:block">${esc(sub)}</span>` : ''}</span>${coverMark}<span class="cover-author">${esc(b.author)}</span></span></span>`;
+    return `<span ${c} ${a11y}><span class="cover-frame"><span><span class="cover-title">${esc(title)}</span>${sub ? `<span class="cover-sub" style="display:block">${esc(sub)}</span>` : ''}</span>${coverMark}${b.author ? `<span class="cover-author">${esc(b.author)}</span>` : ''}</span></span>`;
   }
 
   function card(b, withCategory = false) {
-    return `<li class="card"${withCategory ? ` data-category="${esc(catOf(b) || '')}"` : ''}>${cover(b, { decorative: true })}${catOf(b) ? `<p class="card-cat">${esc(catOf(b))}</p>` : ''}<h3 class="card-title"><a href="${bookPath(b)}">${esc(titleOf(b))}</a></h3><p class="card-author">${esc(b.author)}</p></li>`;
+    return `<li class="card"${withCategory ? ` data-category="${esc(catOf(b) || '')}"` : ''}>${cover(b, { decorative: true })}${catOf(b) ? `<p class="card-cat">${esc(catOf(b))}</p>` : ''}<h3 class="card-title"><a href="${bookPath(b)}">${esc(titleOf(b))}</a></h3>${b.author ? `<p class="card-author">${esc(b.author)}</p>` : ''}</li>`;
   }
 
   function soonCard(b) {
     const sub = loc(lang, b, 'subtitle');
     const note = loc(lang, b, 'note');
     const when = loc(lang, b, 'when');
-    return `<li class="card card--soon">${cover(b, { decorative: true })}<p class="card-cat">${t.soon}${when ? ' · ' + esc(when) : ''}</p><h3 class="card-title">${esc(titleOf(b))}</h3>${sub ? `<p class="card-sub">${esc(sub)}</p>` : ''}${note ? `<p class="card-note">${esc(note)}</p>` : ''}<p class="card-author">${esc(b.author)}</p></li>`;
+    return `<li class="card card--soon">${cover(b, { decorative: true })}<p class="card-cat">${t.soon}${when ? ' · ' + esc(when) : ''}</p><h3 class="card-title">${esc(titleOf(b))}</h3>${sub ? `<p class="card-sub">${esc(sub)}</p>` : ''}${note ? `<p class="card-note">${esc(note)}</p>` : ''}${b.author ? `<p class="card-author">${esc(b.author)}</p>` : ''}</li>`;
   }
 
   // Selector de idioma ES | PT (el idioma actual va resaltado)
@@ -375,7 +375,7 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
     const work = stores.filter((st) => b[st.key]).map((st) => ({ '@type': 'Book', bookFormat: st.format, url: b[st.key], isbn: undefined }));
     outPage(p, document_({
       lang, path: p, order: folioOf(p) + 1, page: 'book', alt: altOf(key),
-      title: `${bt}${sub ? ': ' + sub : ''} — ${b.author} | ${site.name}`,
+      title: `${bt}${sub ? ': ' + sub : ''}${b.author ? ' — ' + b.author : ''} | ${site.name}`,
       description: metaDesc,
       og: { type: 'book', image: loc(lang, b, 'cover') },
       left: leftPage(p, cover(b, { cls: 'only-wide', decorative: true }), key, 'book'),
@@ -385,7 +385,7 @@ ${cover(b, { cls: 'only-narrow' })}
 ${catOf(b) ? `<p class="eyebrow">${esc(catOf(b))}</p>` : ''}
 <h1>${esc(bt)}</h1>
 ${sub ? `<p class="subtitle">${esc(sub)}</p>` : ''}
-<p class="byline">${esc(b.author)}</p>
+${b.author ? `<p class="byline">${esc(b.author)}</p>` : ''}
 <h2>${t.buy}</h2>
 <div class="buy">${buttons}</div>
 <p class="fineprint">${t.buyFine}</p>
@@ -395,7 +395,7 @@ ${rule}
       ld: [
         {
           '@context': 'https://schema.org', '@type': 'Book', name: bt, alternativeHeadline: sub || undefined,
-          author: { '@type': 'Person', name: b.author }, inLanguage: langCode(b.language), url: abs(p), description: desc || undefined,
+          author: b.author ? { '@type': 'Person', name: b.author } : undefined, inLanguage: langCode(b.language), url: abs(p), description: desc || undefined,
           publisher: { '@type': 'Organization', name: site.name, url: site.url }, isbn: b.isbn || undefined,
           numberOfPages: b.pages || undefined, datePublished: b.year ? String(b.year) : undefined, genre: catOf(b) || undefined,
           image: loc(lang, b, 'cover') ? abs(loc(lang, b, 'cover')) : undefined, workExample: work.length ? work : undefined
