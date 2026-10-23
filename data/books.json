@@ -32,9 +32,9 @@
     "subtitle": "Diccionario biográfico y doctrinal de personas, grupos y conceptos del Nuevo Testamento",
     "author": "Lucas Calveiro",
     "year": 2026,
-    "pages": 170,
+    "pages": 168,
     "isbn": "",
-    "language": "Español",
+    "language": "Português",
     "category": "Diccionario bíblico",
     "color": "#7a1424",
     "cover": "/covers/quien-es-quien-nuevo-testamento.jpg",
@@ -48,7 +48,7 @@
     "title_pt": "Quem é quem no Novo Testamento",
     "slug_pt": "quem-e-quem-no-novo-testamento",
     "languages": [
-      "es"
+      "pt"
     ],
     "cover_pt": "/covers/quien-es-quien-en-el-nuevo-testamento-pt-f473d6.jpg"
   },
