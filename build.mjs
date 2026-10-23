@@ -135,50 +135,37 @@ for (const u of upcoming) {
 
 const logo = `<img src="/brand/logo.png" alt="Sion Book" width="838" height="402">`;
 const coverMark = `<svg class="cover-mark" viewBox="0 0 64 44" fill="none" aria-hidden="true"><path d="M32 8C24 3 12 3 4 6v32c8-3 20-3 28 2zM32 8c8-5 20-5 28-2v32c-8-3-20-3-28 2zM32 8v32" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>`;
-// Silueta del Templo de Salt Lake (SVG dibujado con código, sin imágenes): torres macizas con retranqueos, agujas con pináculos,
-// el ángel Moroni en la torre central y el muro de granito con almenas
+// Silueta del Templo de Salt Lake, fachada vista de frente (SVG dibujado con código, sin imágenes):
+// tres torres con retranqueos escalonados y agujas, el ángel Moroni arriba, y ventanas arqueadas y ovaladas en negativo.
 function templeSvg() {
-  const G = 146; // línea del suelo
-  const f = (n) => Number(n.toFixed(1));
-  // Torre: `steps` = [[mitad del ancho, y de arriba], ...] de abajo a arriba (cada paso es un retranqueo); el último es el fuste bajo la aguja
-  const tower = (cx, steps, yTip, pinnacles = true) => {
-    const left = [[cx - steps[0][0], G]];
-    steps.forEach(([hw, y], i) => { left.push([cx - hw, y]); if (steps[i + 1]) left.push([cx - steps[i + 1][0], y]); });
-    const right = left.map(([x, y]) => [2 * cx - x, y]).reverse();
-    const [hw, yTop] = steps[steps.length - 1];
-    const lift = (yTop - yTip) * 0.72;
-    let d = `M${left.map(([x, y]) => `${f(x)} ${y}`).join('L')}`;
-    d += `L${f(cx - hw)} ${yTop}Q${f(cx - hw * 0.3)} ${f(yTop - lift)} ${cx} ${yTip}Q${f(cx + hw * 0.3)} ${f(yTop - lift)} ${f(cx + hw)} ${yTop}`;
-    d += `L${right.map(([x, y]) => `${f(x)} ${y}`).join('L')}Z`;
-    if (pinnacles) { // agujitas en las esquinas del fuste
-      for (const x of [cx - hw, cx + hw]) d += `M${f(x - 1.7)} ${yTop + 1}V${yTop - 8}L${f(x)} ${yTop - 16}L${f(x + 1.7)} ${yTop - 8}V${yTop + 1}Z`;
-    }
-    return d;
-  };
-  // Muro principal con almenas
-  let wall = `M18 ${G}V104`;
-  for (let i = 0; i < 25; i++) wall += `V100h4V104h4`;
-  wall += `V${G}Z`;
-
-  const parts = [
-    wall,
-    tower(26, [[8, 98], [6.5, 86]], 70, false),               // torrecillas de las esquinas
-    tower(214, [[8, 98], [6.5, 86]], 70, false),
-    tower(92, [[10, 90], [8.5, 68]], 44, false),              // agujas de atrás (las torres del oeste)
-    tower(148, [[10, 90], [8.5, 68]], 44, false),
-    tower(62, [[16, 100], [13.5, 76], [10.5, 58]], 34),       // torres laterales
-    tower(178, [[16, 100], [13.5, 76], [10.5, 58]], 34),
-    tower(120, [[20, 94], [17, 70], [13.5, 50]], 20)          // torre central, la más alta
+  const C = 362.5;                       // eje de simetría
+  const mx = (x) => Number((2 * C - x).toFixed(1));
+  // Contorno de la mitad izquierda (de abajo a la izquierda hasta la punta central); la derecha es su espejo
+  const half = [
+    [56, 1210], [56, 535], [80, 535], [80, 465], [99, 465], [99, 411], [112, 411], [139, 285], [167, 411],   // torre izquierda
+    [180, 411], [180, 465], [198, 465], [198, 535], [216, 535], [216, 692],
+    [225, 692], [225, 672], [241, 672], [241, 692], [251, 692], [251, 672], [267, 672], [267, 692], [273, 692], // almenas del muro
+    [273, 490], [296, 490], [296, 411], [317, 411], [317, 338], [327, 338], [C, 160]                          // torre central
   ];
-  // El ángel Moroni sobre la aguja central: cabeza, cuerpo y trompeta
-  const angel = `<circle cx="120" cy="12.6" r="2.3"/><path d="M118.3 19.5 l1.7 -5.2 l1.7 5.2Z"/><path d="M121.3 12 L130.4 6.8 L131.3 8.5 L122.3 13.8Z"/>`;
-  // Ventanas arqueadas (en el color del papel)
-  const win = (x, y, w, h) => `M${f(x - w / 2)} ${f(y + h)}V${f(y + w / 2)}a${w / 2} ${w / 2} 0 0 1 ${w} 0V${f(y + h)}Z`;
-  const windows = [];
-  for (const x of [32, 40, 89, 151, 204, 212]) windows.push(win(x, 116, 4.6, 14));
-  windows.push(win(120, 106, 9, 26), win(120, 76, 5.6, 13), win(120, 56, 3.6, 8));
-  for (const x of [62, 178]) windows.push(win(x, 108, 6, 18), win(x, 82, 4.6, 11), win(x, 64, 3.4, 7));
-  return `<svg class="ornament" viewBox="0 0 240 152" fill="currentColor" aria-hidden="true">${parts.map((d) => `<path d="${d}"/>`).join('')}${angel}<path fill="var(--paper)" d="${windows.join('')}"/></svg>`;
+  const right = half.slice(0, -1).reverse().map(([x, y]) => [mx(x), y]);
+  const outline = `M${[...half, ...right].map(([x, y]) => `${x} ${y}`).join('L')}Z`;
+  // Agujas laterales (bola y mástil) y esfera bajo el ángel
+  const needle = (x) => `<rect x="${x - 2}" y="228" width="4" height="52"/><circle cx="${x}" cy="280" r="8"/>`;
+  const moroni = `<circle cx="${C}" cy="150" r="11"/>`
+    + `<path d="M${C - 9} 140V100c0-9 5-14 9-14s9 5 10 14l4 12-7 3-3-9v34Z"/>`   // cuerpo y brazo
+    + `<circle cx="${C + 1}" cy="73" r="7.5"/>`                                    // cabeza
+    + `<path d="M${C - 22} 66l17 7-2.5 6.5-16-8Z"/>`;                             // trompeta
+  // Ventanas (en el color del papel)
+  const arch = (x, y, w, h) => `M${x} ${y + h}V${y + w / 2}a${w / 2} ${w / 2} 0 0 1 ${w} 0V${y + h}Z`;
+  const ellipse = (cx, cy, rx, ry) => `M${cx - rx} ${cy}a${rx} ${ry} 0 1 0 ${2 * rx} 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0Z`;
+  const win = [];
+  const both = (x, w, fn) => { fn(x); fn(mx(x + w) ); };                          // un hueco a la izquierda y su espejo a la derecha
+  for (const y of [653, 760, 866, 972, 1078]) both(122, 28, (x) => win.push(arch(x, y, 28, 77)));
+  both(226, 36, (x) => win.push(arch(x, 866, 36, 77)));
+  both(222, 44, (x) => win.push(arch(x, 1062, 44, 93)));
+  win.push(arch(C - 20.5, 603, 41, 127), arch(C - 20.5, 773, 41, 170), arch(C - 20.5, 985, 41, 170));
+  win.push(ellipse(244, 781, 18, 22), ellipse(244, 991, 18, 22), ellipse(mx(244), 781, 18, 22), ellipse(mx(244), 991, 18, 22));
+  return `<svg class="ornament" viewBox="40 52 645 1176" fill="currentColor" aria-hidden="true"><path d="${outline}"/>${needle(139)}${needle(mx(139))}${moroni}<path fill="var(--paper)" d="${win.join('')}"/></svg>`;
 }
 const ornament = templeSvg();
 const rule = `<span class="rule" aria-hidden="true"><i></i></span>`;
