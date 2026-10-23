@@ -135,7 +135,52 @@ for (const u of upcoming) {
 
 const logo = `<img src="/brand/logo.png" alt="Sion Book" width="838" height="402">`;
 const coverMark = `<svg class="cover-mark" viewBox="0 0 64 44" fill="none" aria-hidden="true"><path d="M32 8C24 3 12 3 4 6v32c8-3 20-3 28 2zM32 8c8-5 20-5 28-2v32c-8-3-20-3-28 2zM32 8v32" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>`;
-const ornament = `<svg class="ornament" viewBox="0 0 200 120" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M100 14l16 46-16 46-16-46z"/><path d="M100 30l8 30-8 30-8-30z" fill="currentColor" opacity=".25"/><path d="M84 60C60 60 50 40 28 40M84 60C60 60 50 80 28 80M116 60c24 0 34-20 56-20M116 60c24 0 34 20 56 20"/><circle cx="22" cy="40" r="3"/><circle cx="22" cy="80" r="3"/><circle cx="178" cy="40" r="3"/><circle cx="178" cy="80" r="3"/></svg>`;
+// Silueta del Templo de Salt Lake (SVG dibujado con código, sin imágenes): torres macizas con retranqueos, agujas con pináculos,
+// el ángel Moroni en la torre central y el muro de granito con almenas
+function templeSvg() {
+  const G = 146; // línea del suelo
+  const f = (n) => Number(n.toFixed(1));
+  // Torre: `steps` = [[mitad del ancho, y de arriba], ...] de abajo a arriba (cada paso es un retranqueo); el último es el fuste bajo la aguja
+  const tower = (cx, steps, yTip, pinnacles = true) => {
+    const left = [[cx - steps[0][0], G]];
+    steps.forEach(([hw, y], i) => { left.push([cx - hw, y]); if (steps[i + 1]) left.push([cx - steps[i + 1][0], y]); });
+    const right = left.map(([x, y]) => [2 * cx - x, y]).reverse();
+    const [hw, yTop] = steps[steps.length - 1];
+    const lift = (yTop - yTip) * 0.72;
+    let d = `M${left.map(([x, y]) => `${f(x)} ${y}`).join('L')}`;
+    d += `L${f(cx - hw)} ${yTop}Q${f(cx - hw * 0.3)} ${f(yTop - lift)} ${cx} ${yTip}Q${f(cx + hw * 0.3)} ${f(yTop - lift)} ${f(cx + hw)} ${yTop}`;
+    d += `L${right.map(([x, y]) => `${f(x)} ${y}`).join('L')}Z`;
+    if (pinnacles) { // agujitas en las esquinas del fuste
+      for (const x of [cx - hw, cx + hw]) d += `M${f(x - 1.7)} ${yTop + 1}V${yTop - 8}L${f(x)} ${yTop - 16}L${f(x + 1.7)} ${yTop - 8}V${yTop + 1}Z`;
+    }
+    return d;
+  };
+  // Muro principal con almenas
+  let wall = `M18 ${G}V104`;
+  for (let i = 0; i < 25; i++) wall += `V100h4V104h4`;
+  wall += `V${G}Z`;
+
+  const parts = [
+    wall,
+    tower(26, [[8, 98], [6.5, 86]], 70, false),               // torrecillas de las esquinas
+    tower(214, [[8, 98], [6.5, 86]], 70, false),
+    tower(92, [[10, 90], [8.5, 68]], 44, false),              // agujas de atrás (las torres del oeste)
+    tower(148, [[10, 90], [8.5, 68]], 44, false),
+    tower(62, [[16, 100], [13.5, 76], [10.5, 58]], 34),       // torres laterales
+    tower(178, [[16, 100], [13.5, 76], [10.5, 58]], 34),
+    tower(120, [[20, 94], [17, 70], [13.5, 50]], 20)          // torre central, la más alta
+  ];
+  // El ángel Moroni sobre la aguja central: cabeza, cuerpo y trompeta
+  const angel = `<circle cx="120" cy="12.6" r="2.3"/><path d="M118.3 19.5 l1.7 -5.2 l1.7 5.2Z"/><path d="M121.3 12 L130.4 6.8 L131.3 8.5 L122.3 13.8Z"/>`;
+  // Ventanas arqueadas (en el color del papel)
+  const win = (x, y, w, h) => `M${f(x - w / 2)} ${f(y + h)}V${f(y + w / 2)}a${w / 2} ${w / 2} 0 0 1 ${w} 0V${f(y + h)}Z`;
+  const windows = [];
+  for (const x of [32, 40, 89, 151, 204, 212]) windows.push(win(x, 116, 4.6, 14));
+  windows.push(win(120, 106, 9, 26), win(120, 76, 5.6, 13), win(120, 56, 3.6, 8));
+  for (const x of [62, 178]) windows.push(win(x, 108, 6, 18), win(x, 82, 4.6, 11), win(x, 64, 3.4, 7));
+  return `<svg class="ornament" viewBox="0 0 240 152" fill="currentColor" aria-hidden="true">${parts.map((d) => `<path d="${d}"/>`).join('')}${angel}<path fill="var(--paper)" d="${windows.join('')}"/></svg>`;
+}
+const ornament = templeSvg();
 const rule = `<span class="rule" aria-hidden="true"><i></i></span>`;
 
 /* ---------- recursos con hash ---------- */
