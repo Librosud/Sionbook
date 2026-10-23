@@ -297,11 +297,11 @@ html.js .js-only { display: flex; }
 
 /* ---------- Hoja que se pasa: la esquina superior derecha se levanta ---------- */
 
-.curl { position: absolute; inset: 0; z-index: 30; overflow: hidden; pointer-events: none; }
-.curl-layer { position: absolute; inset: 0; visibility: hidden; }
-.curl-page { position: absolute; top: 0; overflow: hidden; }
+.curl { position: absolute; inset: 0; z-index: 30; overflow: hidden; pointer-events: none; transform: translateZ(0); }
+.curl-layer { position: absolute; inset: 0; visibility: hidden; contain: strict; will-change: clip-path; }
+.curl-page { position: absolute; top: 0; overflow: hidden; will-change: transform; backface-visibility: hidden; }
 .curl-page .page-inner { animation: none; }
-.curl-strip { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 90px; }
+.curl-strip { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 90px; will-change: transform; }
 .curl-under .curl-strip { background: linear-gradient(90deg, #0a1440b0, #0a144000); }
 .curl-front .curl-strip { width: 70px; background: linear-gradient(90deg, #0a144070, #0a144000); }
 .curl-flap .curl-strip { width: 120px; background: linear-gradient(90deg, #0a144060, #ffffff4d 38%, #0a14400f); }

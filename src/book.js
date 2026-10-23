@@ -75,6 +75,24 @@
     }
   }
 
+  // Precarga y decodifica las imágenes de una página (portadas) antes de necesitarlas
+  function preloadImages(doc) {
+    [].forEach.call(doc.querySelectorAll('img[src]'), function (im) {
+      var img = new Image();
+      img.decoding = 'async';
+      img.src = im.getAttribute('src');
+      if (img.decode) img.decode().catch(function () {});
+    });
+  }
+  // Las imágenes de lo que entra a la página se cargan ya (sin esperar a "lazy"), para que estén listas al pasar la hoja
+  function eager(root) {
+    [].forEach.call(root.querySelectorAll('img[loading="lazy"]'), function (im) { im.loading = 'eager'; });
+  }
+  function decodeAll(root, ms) {
+    var jobs = [].map.call(root.querySelectorAll('img'), function (im) { return im.decode ? im.decode().catch(function () {}) : null; });
+    return Promise.race([Promise.all(jobs), sleep(ms)]);
+  }
+
   function load(href) {
     var key = new URL(href, location.href);
     key.hash = '';
@@ -89,6 +107,7 @@
         .then(function (text) {
           var doc = new DOMParser().parseFromString(text, 'text/html');
           if (!doc.getElementById('page-left') || !doc.getElementById('page-right')) throw new Error('no pages');
+          preloadImages(doc);
           return doc;
         })
         .catch(function () { cache.delete(key); return null; }));
@@ -109,6 +128,7 @@
     var target = inner(page);
     var copy = document.importNode(sourceInner, true);
     target.replaceChildren.apply(target, Array.prototype.slice.call(copy.childNodes));
+    eager(target);
   }
 
   function syncHead(doc) {
@@ -166,8 +186,8 @@
     var uS = under.querySelector('.curl-strip'), fS = front.querySelector('.curl-strip'), lS = flap.querySelector('.curl-strip');
     var L = 2 * (W + H), rect = [[0, 0], [W, 0], [W, H], [0, H]], amp = Math.min(W * 0.5, 380);
 
+    [uS, fS, lS].forEach(function (n) { n.style.height = L + 'px'; });
     function strip(node, x, y, deg) {
-      node.style.height = L + 'px';
       node.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + deg.toFixed(2) + 'deg) translate(0,' + (-L / 2) + 'px)';
     }
 
@@ -196,20 +216,25 @@
 
   function runCurl(curl, forward, duration) {
     return new Promise(function (resolve) {
-      var t0 = null, done = false;
+      var elapsed = 0, last = null, done = false;
       function end() { if (!done) { done = true; resolve(); } }
       function ease(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+      // El tiempo avanza por fotogramas con un tope: si un fotograma tarda de más (por ejemplo, al preparar las capas),
+      // la animación se retrasa un poco en vez de saltarse el principio (lo que se notaba como "trabado").
       function frame(ts) {
         if (done) return;
-        if (t0 === null) t0 = ts;
-        var t = Math.min(1, (ts - t0) / duration);
+        if (last === null) { last = ts; requestAnimationFrame(frame); return; }
+        elapsed += Math.min(ts - last, 34);
+        last = ts;
+        var t = Math.min(1, elapsed / duration);
         var e = ease(t);
         curl.draw(forward ? e : 1 - e);
         if (t < 1) requestAnimationFrame(frame); else end();
       }
       curl.draw(forward ? 0 : 1);
-      requestAnimationFrame(frame);
-      setTimeout(end, duration + 1500); // red de seguridad (pestaña en segundo plano)
+      // Se dejan pasar dos fotogramas para que el navegador pinte y prepare las capas antes de empezar a mover nada
+      requestAnimationFrame(function () { requestAnimationFrame(frame); });
+      setTimeout(end, duration * 3 + 1500); // red de seguridad (pestaña en segundo plano)
     });
   }
 
@@ -275,7 +300,9 @@
     spread.style.minHeight = H + 'px';
 
     var curl = makeCurl(frontHTML, flapHTML, right().offsetWidth, H, right().offsetLeft);
+    eager(curl.el);
     spread.appendChild(curl.el);
+    await decodeAll(curl.el, 400);
     await runCurl(curl, fwd, phone.matches ? 1000 : 1150);
 
     if (fwd) fill(left(), newLeft); else fill(right(), newRight);
