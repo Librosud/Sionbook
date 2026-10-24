@@ -3,6 +3,38 @@
   "outputDirectory": "dist",
   "cleanUrls": false,
   "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/libros/comentario-doctrinal-nuevo-testamento-tomo-1/",
+      "destination": "/libros/comentario-doctrinal-del-nuevo-testamento-tomo-1/",
+      "statusCode": 301
+    },
+    {
+      "source": "/libros/comentario-doctrinal-nuevo-testamento-tomo-1",
+      "destination": "/libros/comentario-doctrinal-del-nuevo-testamento-tomo-1/",
+      "statusCode": 301
+    },
+    {
+      "source": "/libros/comentario-doctrinal-del-nuevo-testamento/",
+      "destination": "/libros/comentario-doctrinal-del-nuevo-testamento-tomo-2/",
+      "statusCode": 301
+    },
+    {
+      "source": "/libros/comentario-doctrinal-del-nuevo-testamento",
+      "destination": "/libros/comentario-doctrinal-del-nuevo-testamento-tomo-2/",
+      "statusCode": 301
+    },
+    {
+      "source": "/pt/livros/comentario-doutrinal-do-novo-testamento/",
+      "destination": "/pt/livros/comentario-doutrinal-do-novo-testamento-tomo-2/",
+      "statusCode": 301
+    },
+    {
+      "source": "/pt/livros/comentario-doutrinal-do-novo-testamento",
+      "destination": "/pt/livros/comentario-doutrinal-do-novo-testamento-tomo-2/",
+      "statusCode": 301
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
