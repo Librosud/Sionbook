@@ -13,7 +13,7 @@
     "cover": "/covers/comentario-doctrinal-nuevo-testamento-tomo-1-e29406.jpg",
     "description": "Comentario Doctrinal del Nuevo Testamento — Tomo I: Mateo y Marcos\n\n¿Qué pasaba realmente en Galilea, en Jerusalén, en cada aldea donde Jesús enseñó? Este primer tomo del Comentario Doctrinal del Nuevo Testamento recorre, capítulo por capítulo, los Evangelios de Mateo y Marcos, combinando el trasfondo histórico, cultural y social de la época con un comentario doctrinal fiel a la perspectiva de La Iglesia de Jesucristo de los Santos de los Últimos Días. Cada capítulo se desarrolla en formato de preguntas y respuestas, apoyado en fuentes como Bruce R. McConkie, James E. Talmage, Alfred Edersheim, Daniel H. Ludlow y Thomas R. Valletta, entre otros, para iluminar el texto sagrado sin reemplazar nunca la lectura personal de las Escrituras. Pensado como herramienta de estudio —para el aula, el hogar o el estudio individual—, este tomo es el punto de partida de una serie completa que recorrerá todo el Nuevo Testamento.",
     "amazonPrint": "",
-    "amazonKindle": "",
+    "amazonKindle": "https://www.amazon.com/-/es/dp/B0HP6Z33CB",
     "googlePlay": "",
     "subtitle_pt": "Tomo I: Mateus e Marcos",
     "category_pt": "Comentário Doutrinal",
@@ -24,7 +24,10 @@
       "es",
       "pt"
     ],
-    "cover_pt": "/covers/comentario-doctrinal-nuevo-testamento-tomo-1-pt-990763.jpg"
+    "cover_pt": "/covers/comentario-doctrinal-nuevo-testamento-tomo-1-pt-990763.jpg",
+    "amazonPrint_pt": "",
+    "amazonKindle_pt": "",
+    "googlePlay_pt": ""
   },
   {
     "slug": "quien-es-quien-en-el-nuevo-testamento",
@@ -51,7 +54,10 @@
       "pt",
       "es"
     ],
-    "cover_pt": "/covers/quien-es-quien-en-el-nuevo-testamento-pt-f473d6.jpg"
+    "cover_pt": "/covers/quien-es-quien-en-el-nuevo-testamento-pt-f473d6.jpg",
+    "amazonPrint_pt": "",
+    "amazonKindle_pt": "",
+    "googlePlay_pt": ""
   },
   {
     "slug": "comentario-doctrinal-del-nuevo-testamento-tomo-2",
@@ -77,6 +83,9 @@
     "year": 2026,
     "pages": 547,
     "cover_pt": "/covers/comentario-doctrinal-del-nuevo-testamento-pt-170c9d.jpg",
-    "description_pt": "Comentário Doutrinal do Novo Testamento — Tomo II: Lucas e João\n\nO médico que escreveu com precisão de historiador e a testemunha que escreveu com coração de teólogo: assim se complementam Lucas e João, os dois Evangelhos que completam o retrato do Messias. Este segundo tomo dá continuidade à mesma estrutura de perguntas e respostas do Tomo I, capítulo por capítulo, situando cada passagem em seu contexto histórico, cultural e social antes de abrir seu significado doutrinário. Reúne e coloca em diálogo comentaristas como McConkie, Talmage, Edersheim, Ludlow e Valletta para oferecer um estudo profundo e acessível, fiel à doutrina de A Igreja de Jesus Cristo dos Santos dos Últimos Dias. Com este tomo encerra-se o percurso pelos quatro Evangelhos, preparando o terreno para o restante da série, que seguirá com os Atos dos Apóstolos e as epístolas."
+    "description_pt": "Comentário Doutrinal do Novo Testamento — Tomo II: Lucas e João\n\nO médico que escreveu com precisão de historiador e a testemunha que escreveu com coração de teólogo: assim se complementam Lucas e João, os dois Evangelhos que completam o retrato do Messias. Este segundo tomo dá continuidade à mesma estrutura de perguntas e respostas do Tomo I, capítulo por capítulo, situando cada passagem em seu contexto histórico, cultural e social antes de abrir seu significado doutrinário. Reúne e coloca em diálogo comentaristas como McConkie, Talmage, Edersheim, Ludlow e Valletta para oferecer um estudo profundo e acessível, fiel à doutrina de A Igreja de Jesus Cristo dos Santos dos Últimos Dias. Com este tomo encerra-se o percurso pelos quatro Evangelhos, preparando o terreno para o restante da série, que seguirá com os Atos dos Apóstolos e as epístolas.",
+    "amazonPrint_pt": "",
+    "amazonKindle_pt": "",
+    "googlePlay_pt": ""
   }
 ]

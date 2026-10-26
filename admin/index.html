@@ -278,7 +278,7 @@ function missingFor(o, kind, l = L) {
   for (const [k, label] of pairs) if (!has(o, sfx(k, l)) && has(o, sfx(k, OTHER(l)))) m.push(label);   // lo que ya existe en el otro idioma
   if (kind === 'books') {
     if (!has(o, sfx('description', l))) m.push('sinopsis');
-    if (!o.amazonPrint && !o.amazonKindle && !o.googlePlay) m.push('enlaces de compra');
+    if (!has(o, sfx('amazonPrint', l)) && !has(o, sfx('amazonKindle', l)) && !has(o, sfx('googlePlay', l))) m.push('enlaces de compra');
   }
   if (!has(o, 'cover') && !(l === 'pt' && has(o, 'cover_pt'))) m.push('portada');
   return m;
@@ -412,12 +412,12 @@ function editor(kind) {
       ...(isBook ? [field('Idioma del libro', o, 'language', { options: ['Español', 'Português'] }), field('Año', o, 'year', { type: 'number' }), field('Páginas', o, 'pages', { type: 'number' }), field('ISBN', o, 'isbn')] : []),
       field('Color de la tapa', o, 'color', { type: 'color', hint: 'si no hay imagen' })));
   if (isBook) {
-    card.append(h('h3', {}, 'Dónde comprarlo (iguales en los dos idiomas)'),
+    card.append(h('h3', {}, `Dónde comprarlo en el sitio en ${LANG_NAME[L]}`),
       h('div', { class: 'grid3' },
-        field('Amazon (papel)', o, 'amazonPrint', { placeholder: 'https://…' }),
-        field('Amazon (Kindle)', o, 'amazonKindle', { placeholder: 'https://…' }),
-        field('Google Play Libros', o, 'googlePlay', { placeholder: 'https://…' })),
-      h('p', { class: 'note' }, 'Los enlaces vacíos se muestran como “Próximamente” / “Em breve”.'),
+        field('Amazon (papel)', o, sfx('amazonPrint'), { placeholder: 'https://…' }),
+        field('Amazon (Kindle)', o, sfx('amazonKindle'), { placeholder: 'https://…' }),
+        field('Google Play Libros', o, sfx('googlePlay'), { placeholder: 'https://…' })),
+      h('p', { class: 'note' }, `Cada idioma tiene sus propios enlaces. Los que dejes vacíos se muestran como “${L === 'es' ? 'Próximamente' : 'Em breve'}” en el sitio en ${LANG_NAME[L]}.`),
       h('details', { class: 'adv', style: 'margin-top:18px' }, h('summary', {}, `Opciones avanzadas (dirección web en ${LANG_NAME[L]})`),
         h('div', { id: 'slugbox', style: 'margin-top:10px;max-width:420px' }, field(`Dirección web (${LANG_NAME[L]})`, o, sfx('slug'), { hint: 'solo minúsculas, números y guiones', onchange: () => { if (L === 'es') o._slugTouched = true; else o._slugPtTouched = true; } })),
         h('p', { class: 'note' }, 'Se genera sola a partir del título al crear el libro. Cambiarla en un libro ya publicado cambia su dirección en Google.')));
@@ -444,7 +444,7 @@ function listPane(kind) {
   const add = h('button', { class: 'primary', style: 'width:100%;justify-content:center;margin-bottom:12px', onclick: () => {
     // Lo nuevo nace solo en el idioma que estás viendo
     const base = isBook
-      ? { slug: '', title: '', author: '', language: L === 'pt' ? 'Português' : 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', languages: [L], _new: true }
+      ? { slug: '', title: '', author: '', language: L === 'pt' ? 'Português' : 'Español', category: '', color: '#0a2a8a', cover: '', description: '', amazonPrint: '', amazonKindle: '', googlePlay: '', amazonPrint_pt: '', amazonKindle_pt: '', googlePlay_pt: '', languages: [L], _new: true }
       : { title: '', author: '', color: '#0a2a8a', cover: '', languages: [L], _new: true };
     data[kind].push(base); sel[kind] = data[kind].length - 1; markDirty(); render();
   } }, `${isBook ? '＋ Añadir libro' : '＋ Añadir próxima obra'} en ${LANG_NAME[L]}`);
@@ -626,6 +626,8 @@ async function start() {
   data = await api('/api/data');
   etag = data.etag || null;
   data.books.forEach((b) => { if (!Array.isArray(b.languages)) b.languages = [...BOTH]; });
+  // Los enlaces de compra son de cada idioma: si el libro todavía no tiene los de português, se parte de los del español (lo que el sitio ya mostraba)
+  data.books.forEach((b) => ['amazonPrint', 'amazonKindle', 'googlePlay'].forEach((k) => { if (!(k + '_pt' in b)) b[k + '_pt'] = b[k] || ''; }));
   data.upcoming.forEach((u) => { if (!Array.isArray(u.languages)) u.languages = [...BOTH]; });
   render();
 }

@@ -83,6 +83,8 @@ const slugOf = (lang, b) => (lang !== 'es' && b[`slug_${lang}`]) || b.slug;
 // Las claves de libro usan el slug en español: "book:<slug>"
 const routeOf = (lang, key) => (key.startsWith('book:') ? `${R[lang].books}${slugOf(lang, books.find((b) => b.slug === key.slice(5)))}/` : R[lang][key]);
 // Campo traducido: usa `campo_pt` si existe en portugués; si no, el original
+// Enlaces de compra por idioma: el portugués usa `<campo>_pt` si existe (vacío = sin enlace en português); si no existe, hereda el del español
+const linkFor = (lang, b, key) => (lang !== 'es' && Object.prototype.hasOwnProperty.call(b, `${key}_${lang}`) ? b[`${key}_${lang}`] : b[key]);
 const loc = (lang, obj, key) => (lang !== 'es' && obj[`${key}_${lang}`]) || obj[key];
 
 /* ---------- utilidades ---------- */
@@ -120,7 +122,7 @@ for (const b of books) {
   if (b.slug_pt && !/^[a-z0-9-]+$/.test(b.slug_pt)) throw new Error(`Libro ${b.slug}: slug_pt inválido (solo a-z, 0-9 y guiones).`);
   if (!b.title_pt) console.warn(`⚠ ${b.slug}: sin title_pt (la versión en portugués usará el título en español).`);
   if (!b.title) throw new Error(`Libro ${b.slug}: falta el título.`);
-  for (const k of ['amazonPrint', 'amazonKindle', 'googlePlay']) {
+  for (const k of ['amazonPrint', 'amazonKindle', 'googlePlay', 'amazonPrint_pt', 'amazonKindle_pt', 'googlePlay_pt']) {
     if (b[k] && !/^https:\/\//.test(b[k])) console.warn(`⚠ ${b.slug}: ${k} debería empezar por https://`);
   }
   if (!b.description && inLang(b, 'es')) console.warn(`⚠ ${b.slug}: sin descripción (Google necesita texto para indexar la ficha).`);
@@ -395,8 +397,9 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
     const descLang = lang !== 'es' && !b[`description_${lang}`] ? 'es' : lang;
     const buttons = stores.map((st) => {
       const kicker = t.stores[st.key];
-      return b[st.key]
-        ? `<a class="btn" href="${esc(b[st.key])}" target="_blank" rel="noopener nofollow" aria-label="${kicker} ${st.label}: ${esc(bt)} (${t.newTab})"><span class="btn-kicker">${kicker}</span><span class="btn-label">${st.label}</span></a>`
+      const href = linkFor(lang, b, st.key);
+      return href
+        ? `<a class="btn" href="${esc(href)}" target="_blank" rel="noopener nofollow" aria-label="${kicker} ${st.label}: ${esc(bt)} (${t.newTab})"><span class="btn-kicker">${kicker}</span><span class="btn-label">${st.label}</span></a>`
         : `<span class="btn is-disabled" aria-disabled="true"><span class="btn-kicker">${t.soon}</span><span class="btn-label">${kicker} ${st.label}</span></span>`;
     }).join('');
     const meta = [
@@ -404,7 +407,7 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
     ].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
     const desc = descRaw.replace(/\s+/g, ' ').trim();
     const metaDesc = desc ? (desc.length > 155 ? desc.slice(0, 152).replace(/\s+\S*$/, '') + '…' : desc) : t.bookFallback(b, bt);
-    const work = stores.filter((st) => b[st.key]).map((st) => ({ '@type': 'Book', bookFormat: st.format, url: b[st.key], isbn: undefined }));
+    const work = stores.filter((st) => linkFor(lang, b, st.key)).map((st) => ({ '@type': 'Book', bookFormat: st.format, url: linkFor(lang, b, st.key), isbn: undefined }));
     outPage(p, document_({
       lang, path: p, order: folioOf(p) + 1, page: 'book', alt: altOf(key),
       title: `${bt}${sub ? ': ' + sub : ''}${b.author ? ' — ' + b.author : ''} | ${site.name}`,

@@ -72,3 +72,6 @@ Como cada idioma puede tener páginas distintas, el panel las separa: en **Libro
 
 ## Panel: modo Español / Português
 Arriba hay un interruptor **Español | Português**. En cada modo ves **solo** lo de ese idioma: sus libros y próximas obras (con su orden y su número de página), los campos de texto de ese idioma (título, subtítulo, categoría, sinopsis…) y sus textos de la editorial. Cada elemento muestra si está **✓ Completo** o **Falta: …** (sinopsis, portada, enlaces, o algo que ya existe en el otro idioma y falta traducir). Lo nuevo nace en el idioma que estás viendo. Los libros que están solo en el otro idioma aparecen en "Solo en …" con un botón para traerlos. Los datos que no cambian de idioma (autor, año, ISBN, enlaces de compra, color) se editan en la sección "Datos comunes". La pestaña **Comparar ES / PT** muestra las páginas de ambos sitios lado a lado.
+
+## Enlaces de compra por idioma
+Cada idioma tiene sus propios botones de compra: `amazonPrint`, `amazonKindle`, `googlePlay` para el sitio en español y `amazonPrint_pt`, `amazonKindle_pt`, `googlePlay_pt` para el de português. Un campo `_pt` vacío deja ese botón en "Em breve" aunque el de español tenga enlace. Se editan en el panel, en "Dónde comprarlo en el sitio en …", según el idioma activo.

@@ -178,6 +178,12 @@ test('logout borra la cookie', async () => {
   assert.match(r.headers['set-cookie'], /Max-Age=0/);
 });
 
+test('validate: los enlaces de compra de português también exigen https', () => {
+  const site = { es: { about: [] }, pt: { about: [] } };
+  validate({ books: [{ slug: 'a', title: 't', languages: ['es'], amazonKindle: 'https://x.com/a', amazonKindle_pt: '' }], upcoming: [], site });
+  assert.throws(() => validate({ books: [{ slug: 'a', title: 't', languages: ['pt'], amazonKindle_pt: 'http://x.com/a' }], upcoming: [], site }));
+});
+
 test('validate: el autor es opcional (solo el título es obligatorio)', () => {
   const site = { es: { about: [] }, pt: { about: [] } };
   validate({ books: [{ slug: 'a', title: 't', author: '', languages: ['es'] }], upcoming: [{ title: 'u', languages: ['pt'] }], site });
