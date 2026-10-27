@@ -37,7 +37,12 @@
   .card h3 { margin: 22px 0 10px; font-size: 14px; color: var(--navy); text-transform: uppercase; letter-spacing: .06em; padding-top: 14px; border-top: 1px solid var(--line); }
   .card h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
   .list { display: grid; gap: 8px; }
-  .item { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; }
+  .grip { cursor: grab; touch-action: none; user-select: none; color: var(--muted); font-size: 18px; line-height: 1; padding: 6px 2px; }
+  .grip:hover { color: var(--blue); }
+  .item { transition: transform .15s ease; }
+  .item.dragging { transition: none; z-index: 5; position: relative; box-shadow: 0 10px 24px #0a2a8a40; cursor: grabbing; opacity: .95; }
+  body.is-dragging { cursor: grabbing; user-select: none; }
+  .item { display: grid; grid-template-columns: 16px 44px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; }
   .item[aria-current="true"] { border-color: var(--blue); box-shadow: 0 0 0 2px #0a3df022; }
   .thumb { width: 44px; height: 66px; border-radius: 3px; background: var(--navy) center/cover no-repeat; box-shadow: 0 2px 6px #0004; }
   .item b { display: block; line-height: 1.25; font-size: 14px; }
@@ -314,6 +319,7 @@ function renderList() {
     th.style.backgroundSize = 'cover';
     const pg = tab === 'books' ? bookPage(o, L) : null;
     list.append(h('div', { class: 'item', 'aria-current': String(i === sel[tab]), onclick: () => { sel[tab] = i; render(); } },
+      h('div', { class: 'grip', title: 'Mantén apretado y arrastra para cambiar de lugar', onclick: (e) => e.stopPropagation(), onpointerdown: (e) => startDrag(e, pos) }, '⠿'),
       th,
       h('div', {}, h('b', {}, titleIn(o, L)), h('small', {}, o.author || ''),
         h('div', { class: 'meta-row' }, statusChip(missingFor(o, tab)), pg ? h('span', { class: 'pgnum' }, `pág. ${pg}`) : null)),
@@ -323,6 +329,39 @@ function renderList() {
   });
   if (!vis.length) list.append(h('div', { class: 'empty' }, `Todavía no hay nada en el sitio en ${LANG_NAME[L]}.`));
   box.replaceChildren(list);
+}
+// Arrastrar y soltar: se agarra el asa ⠿, se lleva arriba/abajo y al soltar queda en ese lugar (el orden de cada idioma se respeta)
+function startDrag(e, from) {
+  if (e.button !== undefined && e.button !== 0) return;
+  e.preventDefault(); e.stopPropagation();
+  const grip = e.currentTarget; const items = [...document.querySelectorAll('#listbox .item')];
+  const el = items[from]; if (!el) return;
+  const vis = visible(tab); const startY = e.clientY; let to = from;
+  const mids = items.map((it) => { const r = it.getBoundingClientRect(); return r.top + r.height / 2; });
+  const h0 = el.getBoundingClientRect().height + 8;
+  try { grip.setPointerCapture(e.pointerId); } catch {}
+  el.classList.add('dragging'); document.body.classList.add('is-dragging');
+  const paintShift = () => items.forEach((it, k) => {
+    if (it === el) return;
+    const shift = from < to && k > from && k <= to ? -h0 : from > to && k < from && k >= to ? h0 : 0;
+    it.style.transform = shift ? `translateY(${shift}px)` : '';
+  });
+  const onMove = (ev) => {
+    const dy = ev.clientY - startY; el.style.transform = `translateY(${dy}px)`;
+    const y = mids[from] + dy; let n = from;
+    items.forEach((_, k) => { if (k < from && y < mids[k]) n = Math.min(n, k); if (k > from && y > mids[k]) n = Math.max(n, k); });
+    if (n !== to) { to = n; paintShift(); }
+    const sc = ev.clientY < 70 ? -12 : ev.clientY > innerHeight - 70 ? 12 : 0; if (sc) window.scrollBy(0, sc);
+  };
+  const end = (ev) => {
+    grip.removeEventListener('pointermove', onMove); grip.removeEventListener('pointerup', end); grip.removeEventListener('pointercancel', end);
+    document.body.classList.remove('is-dragging');
+    items.forEach((it) => { it.style.transform = ''; it.classList.remove('dragging'); });
+    if (ev.type === 'pointercancel' || to === from) return;
+    const arr = data[tab]; const objs = vis.map((i) => arr[i]); const [m] = objs.splice(from, 1); objs.splice(to, 0, m);
+    vis.forEach((idx, k) => { arr[idx] = objs[k]; }); sel[tab] = vis[to]; markDirty(); render();
+  };
+  grip.addEventListener('pointermove', onMove); grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
 }
 // Mover se intercambia con el vecino de ESTE idioma (así el orden de cada idioma queda como lo ves)
 function move(i, d) {
