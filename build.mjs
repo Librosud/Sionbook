@@ -340,6 +340,9 @@ ${back}${nav}
   const orgLd = { '@context': 'https://schema.org', '@type': 'Organization', name: site.name, url: site.url, description: s.description, founder: { '@type': 'Person', name: site.editor, jobTitle: s.editorTitle }, email: site.email };
   const siteLd = { '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, url: site.url, inLanguage: lang };
 
+  // En "Cómo comprar", Google Play aparece como "Próximamente" mientras ningún libro de este idioma tenga enlace de Google Play
+  const playSoon = !bk.some((b) => linkFor(lang, b, 'googlePlay'));
+
   // Inicio
   outPage(r.home, document_({
     lang, path: r.home, order: 1, page: 'home', alt: altOf('home'),
@@ -359,7 +362,7 @@ ${rule}
 <ul class="formats">
 <li><h3>${t.fPrint[0]}</h3><p>${t.fPrint[1]}</p></li>
 <li><h3>${t.fKindle[0]}</h3><p>${t.fKindle[1]}</p></li>
-<li><h3>${t.fPlay[0]}</h3><p>${t.fPlay[1]}</p></li>
+<li${playSoon ? ' class="is-soon"' : ''}><h3>${t.fPlay[0]}</h3>${playSoon ? `<span class="tag-soon">${t.soon}</span>` : ''}<p>${t.fPlay[1]}</p></li>
 </ul>
 <p class="fineprint">${t.fine}</p>`, 'home'),
     ld: [orgLd, siteLd]

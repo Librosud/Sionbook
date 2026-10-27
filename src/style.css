@@ -237,6 +237,10 @@ html.js .js-only { display: flex; }
 .formats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; list-style: none; padding: 0; margin: 0 0 1rem; }
 .formats li { padding: 1rem; border: 1px solid var(--rule); border-radius: 4px; background: #ffffff88; }
 .formats p { margin: 0; font-size: .95rem; color: var(--muted); }
+/* Formato que aún no está disponible: se ve atenuado y con la etiqueta "Próximamente" */
+.formats li.is-soon { border-style: dashed; background: #ffffff55; }
+.formats li.is-soon h3 { color: var(--muted); }
+.tag-soon { display: inline-block; margin: .1rem 0 .45rem; padding: .12rem .6rem; border-radius: 999px; background: #e3e8f4; color: #5a6783; font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 
 /* ---------- Ficha de libro ---------- */
 
