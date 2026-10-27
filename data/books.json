@@ -89,7 +89,7 @@
     "googlePlay_pt": ""
   },
   {
-    "slug": "comentario-doctrinal-del-nuevo-testamento",
+    "slug": "comentario-doctrinal-del-nuevo-testamento-tomo-3",
     "title": "Comentario Doctrinal del Nuevo Testamento",
     "author": "",
     "language": "Español",
@@ -104,37 +104,17 @@
     "amazonKindle_pt": "",
     "googlePlay_pt": "",
     "languages": [
-      "es"
+      "es",
+      "pt"
     ],
     "subtitle": "Tomo III: Juan",
     "pages": 257,
-    "year": 2026
-  },
-  {
-    "slug": "comentario-doutrinal-do-novo-testamento",
-    "title": "Comentário Doutrinal do Novo Testamento",
-    "author": "",
-    "language": "Português",
-    "category": "",
-    "color": "#0a2a8a",
-    "cover": "",
-    "description": "",
-    "amazonPrint": "",
-    "amazonKindle": "",
-    "googlePlay": "",
-    "amazonPrint_pt": "",
-    "amazonKindle_pt": "",
-    "googlePlay_pt": "",
-    "languages": [
-      "pt"
-    ],
+    "year": 2026,
     "title_pt": "Comentário Doutrinal do Novo Testamento",
-    "slug_pt": "comentario-doutrinal-do-novo-testamento",
+    "slug_pt": "comentario-doutrinal-do-novo-testamento-tomo-3",
     "category_pt": "Comentário Doutrinal",
     "subtitle_pt": "Tomo III: João",
     "description_pt": "Tomo III — João\n\nJoão escreve a partir de um lugar completamente diferente dos outros três evangelistas. Foi apóstolo, testemunha ocular de quase tudo o que narra, e o único que esteve ao pé da cruz. Onde os outros contam, João interpreta; onde documentam, testifica. Seu Evangelho se organiza em torno de sinais cuidadosamente escolhidos e de longos discursos sem paralelo nos sinóticos, com um propósito que o próprio autor declarou: “para que creiais que Jesus é o Cristo, o Filho de Deus, e para que, crendo, tenhais vida em seu nome”.\n\nEste terceiro tomo completa o círculo dos quatro Evangelhos nesta coleção, percorrendo os 21 capítulos de João com o método já estabelecido: perguntas e respostas que reúnem, numa única explicação, a contribuição de Talmage, McConkie, Ludlow, Edersheim, Blumell e Valletta, à luz da doutrina revelada. O testemunho da testemunha que viu seu Mestre morrer e ressuscitar, para que o leitor também venha a crer.",
-    "cover_pt": "/covers/comentario-doutrinal-do-novo-testamento-pt-331f76.jpg",
-    "year": "",
-    "pages": ""
+    "cover_pt": "/covers/comentario-doutrinal-do-novo-testamento-pt-331f76.jpg"
   }
 ]
