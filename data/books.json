@@ -87,5 +87,27 @@
     "amazonPrint_pt": "",
     "amazonKindle_pt": "",
     "googlePlay_pt": ""
+  },
+  {
+    "slug": "comentario-doctrinal-del-nuevo-testamento",
+    "title": "Comentario Doctrinal del Nuevo Testamento",
+    "author": "",
+    "language": "Español",
+    "category": "Comentario Doctrinal",
+    "color": "#0a2a8a",
+    "cover": "/covers/comentario-doctrinal-del-nuevo-testamento-5cd715.jpg",
+    "description": "Tomo III — Juan \n\nJuan escribe desde un lugar por completo distinto al de los otros tres evangelistas. Fue apóstol, testigo ocular de casi todo lo que narra, y el único que estuvo al pie de la cruz. Donde los demás cuentan, Juan interpreta; donde documentan, testifica. Su Evangelio se organiza alrededor de señales cuidadosamente escogidas y de largos discursos sin paralelo en los sinópticos, con un propósito que el propio autor declaró: “para que creáis que Jesús es el Cristo, el Hijo de Dios, y para que creyendo, tengáis vida en su nombre”.\n\nEste tercer tomo completa el círculo de los cuatro Evangelios en esta colección, recorriendo los 21 capítulos de Juan con el método ya establecido: preguntas y respuestas que reúnen, en una sola explicación, lo que aportan Talmage, McConkie, Ludlow, Edersheim, Blumell y Valletta, a la luz de la doctrina revelada. El testimonio del discípulo que vio morir y resucitar a su Maestro, para que el lector también llegue a creer.",
+    "amazonPrint": "",
+    "amazonKindle": "",
+    "googlePlay": "",
+    "amazonPrint_pt": "",
+    "amazonKindle_pt": "",
+    "googlePlay_pt": "",
+    "languages": [
+      "es"
+    ],
+    "subtitle": "Tomo III: Juan",
+    "pages": 257,
+    "year": 2026
   }
 ]
