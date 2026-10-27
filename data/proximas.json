@@ -1,41 +1,5 @@
 [
   {
-    "title": "Antes de partir",
-    "subtitle": "Tomo I — Profetas de la Restauración",
-    "note": "Las últimas palabras públicas de los Presidentes de la Iglesia",
-    "author": "",
-    "when": "Enero 2027",
-    "cover": "/covers/proxima-antes-de-partir-bd5892.jpg",
-    "color": "#0a2a8a",
-    "subtitle_pt": "Tomo I — Profetas da Restauração",
-    "note_pt": "As últimas palavras públicas dos Presidentes da Igreja",
-    "languages": [
-      "es",
-      "pt"
-    ],
-    "title_pt": "Antes de Partir",
-    "when_pt": "Janeiro 2027",
-    "cover_pt": "/covers/proxima-antes-de-partir-pt-ba1496.jpg"
-  },
-  {
-    "title": "Comentario doctrinal del Nuevo Testamento",
-    "subtitle": "Tomo III: Hechos",
-    "note": "Editor General: Lucas Calveiro",
-    "author": "",
-    "when": "",
-    "cover": "/covers/proxima-comentario-doctrinal-del-nuevo-testamento-668deb.jpg",
-    "color": "#0a2a8a",
-    "subtitle_pt": "Tomo III: Atos",
-    "title_pt": "Comentário doutrinário do Novo Testamento",
-    "languages": [
-      "es",
-      "pt"
-    ],
-    "cover_pt": "/covers/proxima-comentario-doctrinal-del-nuevo-testamento-pt-0014d6.jpg",
-    "when_pt": "2026",
-    "note_pt": "Editor Geral: Lucas Calveiro"
-  },
-  {
     "title": "Ministrar como el Salvador",
     "author": "",
     "color": "#0a2a8a",
@@ -58,5 +22,41 @@
     "subtitle_pt": "Um estudo doutrinário sobre o amor, o serviço e o valor de cada alma",
     "when_pt": "2026",
     "cover_pt": "/covers/proxima-ministrar-como-o-salavador-pt-feab18.jpg"
+  },
+  {
+    "title": "Comentario doctrinal del Nuevo Testamento",
+    "subtitle": "Tomo III: Hechos",
+    "note": "Editor General: Lucas Calveiro",
+    "author": "",
+    "when": "",
+    "cover": "/covers/proxima-comentario-doctrinal-del-nuevo-testamento-668deb.jpg",
+    "color": "#0a2a8a",
+    "subtitle_pt": "Tomo III: Atos",
+    "title_pt": "Comentário doutrinário do Novo Testamento",
+    "languages": [
+      "es",
+      "pt"
+    ],
+    "cover_pt": "/covers/proxima-comentario-doctrinal-del-nuevo-testamento-pt-0014d6.jpg",
+    "when_pt": "2026",
+    "note_pt": "Editor Geral: Lucas Calveiro"
+  },
+  {
+    "title": "Antes de partir",
+    "subtitle": "Tomo I — Profetas de la Restauración",
+    "note": "Las últimas palabras públicas de los Presidentes de la Iglesia",
+    "author": "",
+    "when": "Enero 2027",
+    "cover": "/covers/proxima-antes-de-partir-bd5892.jpg",
+    "color": "#0a2a8a",
+    "subtitle_pt": "Tomo I — Profetas da Restauração",
+    "note_pt": "As últimas palavras públicas dos Presidentes da Igreja",
+    "languages": [
+      "es",
+      "pt"
+    ],
+    "title_pt": "Antes de Partir",
+    "when_pt": "Janeiro 2027",
+    "cover_pt": "/covers/proxima-antes-de-partir-pt-ba1496.jpg"
   }
 ]
