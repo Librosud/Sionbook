@@ -14,7 +14,7 @@
       "pt"
     ],
     "title_pt": "Antes de Partir",
-    "when_pt": "2026",
+    "when_pt": "Enero 2027",
     "cover_pt": "/covers/proxima-antes-de-partir-pt-ba1496.jpg"
   },
   {
@@ -31,7 +31,7 @@
       "es",
       "pt"
     ],
-    "cover_pt": "/covers/proxima-comentario-doctrinal-del-nuevo-testamento-pt-650f0a.jpg",
+    "cover_pt": "/covers/proxima-comentario-doctrinal-del-nuevo-testamento-pt-0014d6.jpg",
     "when_pt": "2026",
     "note_pt": "Editor Geral: Lucas Calveiro"
   },
@@ -45,5 +45,18 @@
     ],
     "subtitle": "Un estudio doctrinal sobre el amor, el servicio y el valor de cada alma",
     "when": "Diciembre 2026"
+  },
+  {
+    "title": "Ministrar como o Salavador",
+    "author": "",
+    "color": "#0a2a8a",
+    "cover": "",
+    "languages": [
+      "pt"
+    ],
+    "title_pt": "Ministrar como o Salavador",
+    "subtitle_pt": "Um estudo doutrinário sobre o amor, o serviço e o valor de cada alma",
+    "when_pt": "2026",
+    "cover_pt": "/covers/proxima-ministrar-como-o-salavador-pt-feab18.jpg"
   }
 ]
