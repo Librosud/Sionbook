@@ -85,6 +85,8 @@ const routeOf = (lang, key) => (key.startsWith('book:') ? `${R[lang].books}${slu
 // Campo traducido: usa `campo_pt` si existe en portugués; si no, el original
 // Enlaces de compra por idioma: el portugués usa `<campo>_pt` si existe (vacío = sin enlace en português); si no existe, hereda el del español
 const linkFor = (lang, b, key) => (lang !== 'es' && Object.prototype.hasOwnProperty.call(b, `${key}_${lang}`) ? b[`${key}_${lang}`] : b[key]);
+// Idioma en que está escrito el libro: cada versión del sitio tiene el suyo (`language_pt` en português; si no existe, hereda `language`)
+const bookLang = (lang, b) => (lang !== 'es' && Object.prototype.hasOwnProperty.call(b, `language_${lang}`) ? b[`language_${lang}`] : b.language);
 const loc = (lang, obj, key) => (lang !== 'es' && obj[`${key}_${lang}`]) || obj[key];
 
 /* ---------- utilidades ---------- */
@@ -406,7 +408,7 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
         : `<span class="btn is-disabled" aria-disabled="true"><span class="btn-kicker">${t.soon}</span><span class="btn-label">${kicker} ${st.label}</span></span>`;
     }).join('');
     const meta = [
-      [t.meta.author, b.author], [t.meta.category, catOf(b)], [t.meta.language, langName(b.language)], [t.meta.year, b.year], [t.meta.pages, b.pages], [t.meta.isbn, b.isbn]
+      [t.meta.author, b.author], [t.meta.category, catOf(b)], [t.meta.language, langName(bookLang(lang, b))], [t.meta.year, b.year], [t.meta.pages, b.pages], [t.meta.isbn, b.isbn]
     ].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
     const desc = descRaw.replace(/\s+/g, ' ').trim();
     const metaDesc = desc ? (desc.length > 155 ? desc.slice(0, 152).replace(/\s+\S*$/, '') + '…' : desc) : t.bookFallback(b, bt);
@@ -433,7 +435,7 @@ ${rule}
       ld: [
         {
           '@context': 'https://schema.org', '@type': 'Book', name: bt, alternativeHeadline: sub || undefined,
-          author: b.author ? { '@type': 'Person', name: b.author } : undefined, inLanguage: langCode(b.language), url: abs(p), description: desc || undefined,
+          author: b.author ? { '@type': 'Person', name: b.author } : undefined, inLanguage: langCode(bookLang(lang, b)), url: abs(p), description: desc || undefined,
           publisher: { '@type': 'Organization', name: site.name, url: site.url }, isbn: b.isbn || undefined,
           numberOfPages: b.pages || undefined, datePublished: b.year ? String(b.year) : undefined, genre: catOf(b) || undefined,
           image: loc(lang, b, 'cover') ? abs(loc(lang, b, 'cover')) : undefined, workExample: work.length ? work : undefined
