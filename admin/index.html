@@ -448,9 +448,12 @@ function editor(kind) {
   card.append(h('h3', {}, 'Datos comunes (iguales en español y português)'),
     h('div', { class: 'grid3' },
       field('Autor', o, 'author', { hint: 'opcional: déjalo vacío si no quieres mostrar autor' }),
-      ...(isBook ? [field(`Idioma del libro (en el sitio en ${LANG_NAME[L]})`, o, sfx('language'), { options: ['Español', 'Português'] }), field('Año', o, 'year', { type: 'number' }), field('Páginas', o, 'pages', { type: 'number' }), field('ISBN', o, 'isbn')] : []),
+      ...(isBook ? [field('Año', o, 'year', { type: 'number' }), field('Páginas', o, 'pages', { type: 'number' }), field('ISBN', o, 'isbn')] : []),
       field('Color de la tapa', o, 'color', { type: 'color', hint: 'si no hay imagen' })));
   if (isBook) {
+    card.append(h('h3', {}, `Idioma en que está escrito el libro (en el sitio en ${LANG_NAME[L]})`),
+      h('div', { class: 'grid3' }, field('Idioma del libro', o, sfx('language'), { options: ['Español', 'Português'] })),
+      h('p', { class: 'note' }, `Es solo para la pestaña de ${LANG_NAME[L]}: la otra pestaña tiene su propio valor.`));
     card.append(h('h3', {}, `Dónde comprarlo en el sitio en ${LANG_NAME[L]}`),
       h('div', { class: 'grid3' },
         field('Amazon (papel)', o, sfx('amazonPrint'), { placeholder: 'https://…' }),

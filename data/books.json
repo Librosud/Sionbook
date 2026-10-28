@@ -7,7 +7,7 @@
     "year": 2026,
     "pages": 168,
     "isbn": "",
-    "language": "Português",
+    "language": "Español",
     "category": "Diccionario bíblico",
     "color": "#7a1424",
     "cover": "/covers/quien-es-quien-nuevo-testamento.jpg",
@@ -27,7 +27,8 @@
     "cover_pt": "/covers/quien-es-quien-en-el-nuevo-testamento-pt-f473d6.jpg",
     "amazonPrint_pt": "",
     "amazonKindle_pt": "",
-    "googlePlay_pt": ""
+    "googlePlay_pt": "",
+    "language_pt": "Português"
   },
   {
     "slug": "comentario-doctrinal-del-nuevo-testamento-tomo-1",
@@ -37,7 +38,7 @@
     "year": 2026,
     "pages": 369,
     "isbn": "",
-    "language": "Português",
+    "language": "Español",
     "category": "Comentario Doctrinal",
     "color": "#0a2a8a",
     "cover": "/covers/comentario-doctrinal-nuevo-testamento-tomo-1-e29406.jpg",
@@ -57,13 +58,14 @@
     "cover_pt": "/covers/comentario-doctrinal-nuevo-testamento-tomo-1-pt-990763.jpg",
     "amazonPrint_pt": "",
     "amazonKindle_pt": "",
-    "googlePlay_pt": ""
+    "googlePlay_pt": "",
+    "language_pt": "Português"
   },
   {
     "slug": "comentario-doctrinal-del-nuevo-testamento-tomo-2",
     "title": "Comentario Doctrinal del Nuevo Testamento",
     "author": "",
-    "language": "Português",
+    "language": "Español",
     "category": "Comentario Doctrinal",
     "color": "#0a2a8a",
     "cover": "/covers/comentario-doctrinal-del-nuevo-testamento-tomo-2-df82d3.jpg",
@@ -86,13 +88,14 @@
     "description_pt": "Tomo II — Lucas \n\nLucas escreve como o que provavelmente foi: um médico, um homem culto, um historiador cuidadoso de suas fontes, e o único dos quatro evangelistas que não era judeu. Esse olhar de estrangeiro explica boa parte do que distingue seu Evangelho: a atenção aos detalhes médicos, o interesse pelas mulheres, os pobres, os samaritanos e todos aqueles que a sociedade de seu tempo deixava à margem, e parábolas que só ele conservou —o bom samaritano, o filho pródigo, o rico e Lázaro— nas quais o ministério de Jesus Cristo se revela, antes de tudo, como uma missão de compaixão universal.\n\nEste segundo tomo da coleção percorre os 24 capítulos do Evangelho segundo São Lucas com o mesmo método do primeiro: perguntas e respostas que tecem, numa única prosa contínua, a contribuição de Talmage, McConkie, Ludlow, Edersheim, Blumell e Valletta, iluminados pela doutrina dos profetas e apóstolos, antigos e modernos. Um comentário pensado a partir da fé dos Santos dos Últimos Dias, e para ela.",
     "amazonPrint_pt": "",
     "amazonKindle_pt": "",
-    "googlePlay_pt": ""
+    "googlePlay_pt": "",
+    "language_pt": "Português"
   },
   {
     "slug": "comentario-doctrinal-del-nuevo-testamento-tomo-3",
     "title": "Comentario Doctrinal del Nuevo Testamento",
     "author": "",
-    "language": "Português",
+    "language": "Español",
     "category": "Comentario Doctrinal",
     "color": "#0a2a8a",
     "cover": "/covers/comentario-doctrinal-del-nuevo-testamento-5cd715.jpg",
@@ -115,6 +118,7 @@
     "category_pt": "Comentário Doutrinal",
     "subtitle_pt": "Tomo III: João",
     "description_pt": "Tomo III — João\n\nJoão escreve a partir de um lugar completamente diferente dos outros três evangelistas. Foi apóstolo, testemunha ocular de quase tudo o que narra, e o único que esteve ao pé da cruz. Onde os outros contam, João interpreta; onde documentam, testifica. Seu Evangelho se organiza em torno de sinais cuidadosamente escolhidos e de longos discursos sem paralelo nos sinóticos, com um propósito que o próprio autor declarou: “para que creiais que Jesus é o Cristo, o Filho de Deus, e para que, crendo, tenhais vida em seu nome”.\n\nEste terceiro tomo completa o círculo dos quatro Evangelhos nesta coleção, percorrendo os 21 capítulos de João com o método já estabelecido: perguntas e respostas que reúnem, numa única explicação, a contribuição de Talmage, McConkie, Ludlow, Edersheim, Blumell e Valletta, à luz da doutrina revelada. O testemunho da testemunha que viu seu Mestre morrer e ressuscitar, para que o leitor também venha a crer.",
-    "cover_pt": "/covers/comentario-doutrinal-do-novo-testamento-pt-331f76.jpg"
+    "cover_pt": "/covers/comentario-doutrinal-do-novo-testamento-pt-331f76.jpg",
+    "language_pt": "Português"
   }
 ]
