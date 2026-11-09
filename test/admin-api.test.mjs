@@ -190,3 +190,19 @@ test('validate: el autor es opcional (solo el título es obligatorio)', () => {
   assert.throws(() => validate({ books: [{ slug: 'a', title: '', languages: ['es'] }], upcoming: [], site }));
   assert.throws(() => validate({ books: [], upcoming: [{ title: '', languages: ['es'] }], site }));
 });
+
+test('isEpub: reconoce un EPUB por su cabecera y rechaza otros archivos', async () => {
+  const { isEpub } = await import('../lib/validate.js');
+  const name = Buffer.from('mimetype'); const body = Buffer.from('application/epub+zip');
+  const head = Buffer.alloc(30); head.writeUInt32LE(0x04034b50, 0); head.writeUInt16LE(name.length, 26);
+  const epub = Buffer.concat([head, name, body, Buffer.alloc(80)]);
+  assert.equal(isEpub(epub), true);
+  assert.equal(isEpub(Buffer.alloc(200)), false);
+  assert.equal(isEpub(Buffer.from('%PDF-1.7'.padEnd(200, ' '))), false);
+});
+
+test('validate: la muestra debe ser un EPUB de /muestras/', async () => {
+  const site = { es: { about: [] }, pt: { about: [] } };
+  validate({ books: [{ slug: 'a', title: 't', languages: ['es'], sample: '/muestras/a-muestra-1a2b3c.epub', sample_pt: '' }], upcoming: [], site });
+  assert.throws(() => validate({ books: [{ slug: 'a', title: 't', languages: ['es'], sample: 'https://x.com/a.epub' }], upcoming: [], site }));
+});

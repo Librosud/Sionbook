@@ -35,7 +35,7 @@ const T = {
     fine: 'Cada ficha de libro tiene botones directos a cada tienda: eliges el formato y compras allí.',
     catTitle: 'Catálogo de libros', catDesc: (n) => `Catálogo completo de ${site.name}: ${n} título${n === 1 ? '' : 's'} disponibles en papel, Kindle y Google Play Libros.`,
     catLead: 'Todos nuestros libros, con enlace directo a Amazon y Google Play Libros.', filterAria: 'Filtrar por categoría', all: 'Todos',
-    crumbAria: 'Migas de pan', buy: 'Comprar', buyFine: 'Los botones te llevan a la tienda, donde completas la compra.',
+    sample: 'Descargar muestra', sampleKicker: 'EPUB gratis', sampleFine: 'Un fragmento del libro para leer antes de comprar.', crumbAria: 'Migas de pan', buy: 'Comprar', buyFine: 'Los botones te llevan a la tienda, donde completas la compra.',
     soon: 'Próximamente', coverOf: 'Portada de', newTab: 'se abre en una pestaña nueva',
     stores: { amazonPrint: 'Papel en', amazonKindle: 'Kindle en', googlePlay: 'Ebook en' }, playName: 'Google Play Libros',
     meta: { author: 'Autor', category: 'Categoría', language: 'Idioma', year: 'Año', pages: 'Páginas', isbn: 'ISBN' },
@@ -59,7 +59,7 @@ const T = {
     fine: 'Cada ficha de livro tem botões diretos para cada loja: você escolhe o formato e compra lá.',
     catTitle: 'Catálogo de livros', catDesc: (n) => `Catálogo completo da ${site.name}: ${n} título${n === 1 ? '' : 's'} disponíve${n === 1 ? 'l' : 'is'} em papel, Kindle e Google Play Livros.`,
     catLead: 'Todos os nossos livros, com link direto para a Amazon e o Google Play Livros.', filterAria: 'Filtrar por categoria', all: 'Todos',
-    crumbAria: 'Trilha de navegação', buy: 'Comprar', buyFine: 'Os botões levam você à loja, onde a compra é concluída.',
+    sample: 'Baixar amostra', sampleKicker: 'EPUB grátis', sampleFine: 'Um trecho do livro para ler antes de comprar.', crumbAria: 'Trilha de navegação', buy: 'Comprar', buyFine: 'Os botões levam você à loja, onde a compra é concluída.',
     soon: 'Em breve', coverOf: 'Capa de', newTab: 'abre em uma nova aba',
     stores: { amazonPrint: 'Papel na', amazonKindle: 'Kindle na', googlePlay: 'Ebook no' }, playName: 'Google Play Livros',
     meta: { author: 'Autor', category: 'Categoria', language: 'Idioma', year: 'Ano', pages: 'Páginas', isbn: 'ISBN' },
@@ -407,6 +407,10 @@ ${categories.length > 1 ? `<div class="chips js-only" data-filter-scope role="gr
         ? `<a class="btn" href="${esc(href)}" target="_blank" rel="noopener nofollow" aria-label="${kicker} ${st.label}: ${esc(bt)} (${t.newTab})"><span class="btn-kicker">${kicker}</span><span class="btn-label">${st.label}</span></a>`
         : `<span class="btn is-disabled" aria-disabled="true"><span class="btn-kicker">${t.soon}</span><span class="btn-label">${kicker} ${st.label}</span></span>`;
     }).join('');
+    // Muestra EPUB: cada idioma tiene la suya (no se hereda)
+    const samplePath = lang === 'es' ? b.sample : b.sample_pt;
+    if (samplePath && !fs.existsSync(path.join(root, 'assets', samplePath))) console.warn(`⚠ ${b.slug}: no se encuentra el archivo de la muestra ${samplePath}`);
+    const sampleHtml = samplePath ? `<p class="sample"><a class="btn btn--sample" href="${esc(samplePath)}" download aria-label="${t.sample}: ${esc(bt)} (EPUB)"><span class="btn-kicker">${t.sampleKicker}</span><span class="btn-label">${t.sample}</span></a></p><p class="fineprint">${t.sampleFine}</p>` : '';
     const meta = [
       [t.meta.author, b.author], [t.meta.category, catOf(b)], [t.meta.language, langName(bookLang(lang, b))], [t.meta.year, b.year], [t.meta.pages, b.pages], [t.meta.isbn, b.isbn]
     ].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
@@ -429,6 +433,7 @@ ${b.author ? `<p class="byline">${esc(b.author)}</p>` : ''}
 <h2>${t.buy}</h2>
 <div class="buy">${buttons}</div>
 <p class="fineprint">${t.buyFine}</p>
+${sampleHtml}
 ${rule}
 <div class="prose" lang="${descLang}">${paragraphs(descRaw)}</div>
 <dl class="meta">${meta}</dl>`, key),
@@ -598,6 +603,12 @@ if (fs.existsSync(coversDir)) {
   for (const f of fs.readdirSync(coversDir)) {
     if (/\.(jpe?g|png|webp|avif)$/i.test(f)) out(`covers/${f}`, fs.readFileSync(path.join(coversDir, f)));
   }
+}
+
+// Muestras EPUB (assets/muestras → dist/muestras)
+const samplesDir = path.join(root, 'assets/muestras');
+if (fs.existsSync(samplesDir)) {
+  for (const f of fs.readdirSync(samplesDir)) if (/\.epub$/i.test(f)) out(`muestras/${f}`, fs.readFileSync(path.join(samplesDir, f)));
 }
 
 console.log(`✔ Sitio generado en dist/ — ${LANGS.map((l) => `${l.toUpperCase()}: ${built[l].length} páginas`).join(' · ')} (${books.length} libros).`);

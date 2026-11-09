@@ -422,3 +422,9 @@ html.js .js-only { display: flex; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* Muestra EPUB */
+.sample { margin: .2rem 0 .4rem; }
+.btn--sample { display: inline-block; min-width: 190px; background: #fff; color: var(--blue, #0a2a8a); border: 1.5px solid currentColor; box-shadow: none; padding-right: 2.6rem; }
+.btn--sample::after { content: "\2193"; }
+.btn--sample:hover { color: #fff; background: var(--blue, #0a2a8a); }
