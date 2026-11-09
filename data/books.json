@@ -28,7 +28,11 @@
     "amazonPrint_pt": "",
     "amazonKindle_pt": "",
     "googlePlay_pt": "",
-    "language_pt": "Português"
+    "language_pt": "Português",
+    "sample": "/muestras/quien-es-quien-en-el-nuevo-testamento-es-muestra-b2a974.epub",
+    "sample_pt": "",
+    "samplePdf": "/muestras/quien-es-quien-en-el-nuevo-testamento-es-muestra-b71931.pdf",
+    "samplePdf_pt": ""
   },
   {
     "slug": "comentario-doctrinal-del-nuevo-testamento-tomo-1",
@@ -59,7 +63,11 @@
     "amazonPrint_pt": "",
     "amazonKindle_pt": "",
     "googlePlay_pt": "",
-    "language_pt": "Português"
+    "language_pt": "Português",
+    "sample": "",
+    "sample_pt": "",
+    "samplePdf": "",
+    "samplePdf_pt": ""
   },
   {
     "slug": "comentario-doctrinal-del-nuevo-testamento-tomo-2",
@@ -89,7 +97,11 @@
     "amazonPrint_pt": "",
     "amazonKindle_pt": "",
     "googlePlay_pt": "",
-    "language_pt": "Português"
+    "language_pt": "Português",
+    "sample": "",
+    "sample_pt": "",
+    "samplePdf": "",
+    "samplePdf_pt": ""
   },
   {
     "slug": "comentario-doctrinal-del-nuevo-testamento-tomo-3",
@@ -119,6 +131,10 @@
     "subtitle_pt": "Tomo III: João",
     "description_pt": "Tomo III — João\n\nJoão escreve a partir de um lugar completamente diferente dos outros três evangelistas. Foi apóstolo, testemunha ocular de quase tudo o que narra, e o único que esteve ao pé da cruz. Onde os outros contam, João interpreta; onde documentam, testifica. Seu Evangelho se organiza em torno de sinais cuidadosamente escolhidos e de longos discursos sem paralelo nos sinóticos, com um propósito que o próprio autor declarou: “para que creiais que Jesus é o Cristo, o Filho de Deus, e para que, crendo, tenhais vida em seu nome”.\n\nEste terceiro tomo completa o círculo dos quatro Evangelhos nesta coleção, percorrendo os 21 capítulos de João com o método já estabelecido: perguntas e respostas que reúnem, numa única explicação, a contribuição de Talmage, McConkie, Ludlow, Edersheim, Blumell e Valletta, à luz da doutrina revelada. O testemunho da testemunha que viu seu Mestre morrer e ressuscitar, para que o leitor também venha a crer.",
     "cover_pt": "/covers/comentario-doutrinal-do-novo-testamento-pt-331f76.jpg",
-    "language_pt": "Português"
+    "language_pt": "Português",
+    "sample": "",
+    "sample_pt": "",
+    "samplePdf": "",
+    "samplePdf_pt": ""
   }
 ]
