@@ -37,9 +37,16 @@
   ],
   "headers": [
     {
-      "source": "/muestras/(.*)",
+      "source": "/muestras/(.*)\\.epub",
       "headers": [
         { "key": "Content-Type", "value": "application/epub+zip" },
+        { "key": "Content-Disposition", "value": "attachment" }
+      ]
+    },
+    {
+      "source": "/muestras/(.*)\\.pdf",
+      "headers": [
+        { "key": "Content-Type", "value": "application/pdf" },
         { "key": "Content-Disposition", "value": "attachment" }
       ]
     },

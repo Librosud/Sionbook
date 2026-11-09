@@ -201,6 +201,15 @@ test('isEpub: reconoce un EPUB por su cabecera y rechaza otros archivos', async 
   assert.equal(isEpub(Buffer.from('%PDF-1.7'.padEnd(200, ' '))), false);
 });
 
+test('isPdf y muestra PDF', async () => {
+  const { isPdf } = await import('../lib/validate.js');
+  assert.equal(isPdf(Buffer.from('%PDF-1.7'.padEnd(200, ' '))), true);
+  assert.equal(isPdf(Buffer.alloc(200)), false);
+  const site = { es: { about: [] }, pt: { about: [] } };
+  validate({ books: [{ slug: 'a', title: 't', languages: ['es'], samplePdf: '/muestras/a-1a2b3c.pdf' }], upcoming: [], site });
+  assert.throws(() => validate({ books: [{ slug: 'a', title: 't', languages: ['es'], samplePdf: '/muestras/a-1a2b3c.epub' }], upcoming: [], site }));
+});
+
 test('validate: la muestra debe ser un EPUB de /muestras/', async () => {
   const site = { es: { about: [] }, pt: { about: [] } };
   validate({ books: [{ slug: 'a', title: 't', languages: ['es'], sample: '/muestras/a-muestra-1a2b3c.epub', sample_pt: '' }], upcoming: [], site });

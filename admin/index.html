@@ -220,16 +220,17 @@ function field(label, obj, key, { lang, type = 'text', hint, area, onchange, pla
 }
 
 /* ---------- muestra EPUB ---------- */
-function sampleBox(obj, key, slugBase) {
+function sampleBox(obj, key, slugBase, fmt = 'epub') {
+  const FM = fmt.toUpperCase();
   const info = h('div', { class: 'cover-info' });
-  const file = h('input', { type: 'file', accept: '.epub,application/epub+zip', style: 'display:none' });
-  const paint = () => { info.innerHTML = obj[key] ? `<div class="ok">✓ Muestra cargada</div><div>${obj[key]}</div>` : '<div>Sin muestra: en el sitio no aparece el botón “Descargar muestra”.</div>'; };
+  const file = h('input', { type: 'file', accept: fmt === 'pdf' ? '.pdf,application/pdf' : '.epub,application/epub+zip', style: 'display:none' });
+  const paint = () => { info.innerHTML = obj[key] ? `<div class="ok">✓ Muestra cargada</div><div>${obj[key]}</div>` : `<div>Sin muestra en ${FM}: no aparece ese botón en el sitio.</div>`; };
   file.addEventListener('change', async () => {
     const f = file.files[0]; if (!f) return;
     try {
-      if (!/\.epub$/i.test(f.name)) throw new Error('Tiene que ser un archivo .epub');
+      if (!new RegExp('\\.' + fmt + '$', 'i').test(f.name)) throw new Error(`Tiene que ser un archivo .${fmt}`);
       if (f.size > 3_000_000) throw new Error('La muestra pesa más de 3 MB. Haz una más corta.');
-      const r = await api('/api/upload', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'sample', name: (slugBase() || 'muestra') + '-muestra', dataBase64: await fileToBase64(f) }) });
+      const r = await api('/api/upload', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'sample', format: fmt, name: (slugBase() || 'muestra') + '-muestra', dataBase64: await fileToBase64(f) }) });
       if (!r.ok) throw new Error(r.error);
       if (cloud) pending.push({ path: r.path, sha: r.sha });
       obj[key] = r.path; markDirty(); paint(); toast(`Muestra subida (${r.kb} KB)${cloud ? '. Se publicará al guardar.' : ''}`, 'good');
@@ -238,7 +239,7 @@ function sampleBox(obj, key, slugBase) {
   });
   paint();
   return h('div', {}, h('div', { class: 'row' },
-    h('button', { type: 'button', onclick: () => file.click() }, obj[key] ? 'Cambiar muestra' : 'Subir muestra (.epub)'),
+    h('button', { type: 'button', onclick: () => file.click() }, obj[key] ? `Cambiar muestra ${FM}` : `Subir muestra (.${fmt})`),
     obj[key] ? h('button', { type: 'button', class: 'danger', onclick: () => { obj[key] = ''; markDirty(); paint(); } }, 'Quitar') : null, file), info);
 }
 
@@ -477,9 +478,10 @@ function editor(kind) {
     card.append(h('h3', {}, `Idioma en que está escrito el libro (en el sitio en ${LANG_NAME[L]})`),
       h('div', { class: 'grid3' }, field('Idioma del libro', o, sfx('language'), { options: ['Español', 'Português'] })),
       h('p', { class: 'note' }, `Es solo para la pestaña de ${LANG_NAME[L]}: la otra pestaña tiene su propio valor.`));
-    card.append(h('h3', {}, `Muestra gratis para descargar (EPUB) en el sitio en ${LANG_NAME[L]}`),
-      sampleBox(o, sfx('sample'), () => (L === 'pt' ? (o.slug_pt || o.slug) : o.slug) + '-' + L),
-      h('p', { class: 'note' }, `Opcional. Es un fragmento del libro (máx. 3 MB) que se baja con el botón “${L === 'es' ? 'Descargar muestra' : 'Baixar amostra'}”. Cada idioma tiene la suya.`));
+    const sampleSlug = () => (L === 'pt' ? (o.slug_pt || o.slug) : o.slug) + '-' + L;
+    card.append(h('h3', {}, `Muestra gratis para descargar en el sitio en ${LANG_NAME[L]}`),
+      h('div', { class: 'grid3' }, sampleBox(o, sfx('sample'), sampleSlug, 'epub'), sampleBox(o, sfx('samplePdf'), sampleSlug, 'pdf')),
+      h('p', { class: 'note' }, `Opcional. Un fragmento del libro (máx. 3 MB cada archivo) en EPUB y/o PDF. Cada formato suma un botón “${L === 'es' ? 'Descargar muestra' : 'Baixar amostra'}” en la ficha. Cada idioma tiene los suyos.`));
     card.append(h('h3', {}, `Dónde comprarlo en el sitio en ${LANG_NAME[L]}`),
       h('div', { class: 'grid3' },
         field('Amazon (papel)', o, sfx('amazonPrint'), { placeholder: 'https://…' }),
@@ -695,7 +697,7 @@ async function start() {
   etag = data.etag || null;
   data.books.forEach((b) => { if (!Array.isArray(b.languages)) b.languages = [...BOTH]; });
   // Los enlaces de compra son de cada idioma: si el libro todavía no tiene los de português, se parte de los del español (lo que el sitio ya mostraba)
-  data.books.forEach((b) => { if (!('sample' in b)) b.sample = ''; if (!('sample_pt' in b)) b.sample_pt = ''; });
+  data.books.forEach((b) => { if (!('sample' in b)) b.sample = ''; if (!('sample_pt' in b)) b.sample_pt = ''; if (!('samplePdf' in b)) b.samplePdf = ''; if (!('samplePdf_pt' in b)) b.samplePdf_pt = ''; });
   data.books.forEach((b) => { if (!('language_pt' in b)) b.language_pt = b.language || ''; });
   data.books.forEach((b) => ['amazonPrint', 'amazonKindle', 'googlePlay'].forEach((k) => { if (!(k + '_pt' in b)) b[k + '_pt'] = b[k] || ''; }));
   data.upcoming.forEach((u) => { if (!Array.isArray(u.languages)) u.languages = [...BOTH]; });

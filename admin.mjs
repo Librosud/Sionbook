@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { clean, validate, imageKind, isEpub, safeBase } from './lib/validate.js';
+import { clean, validate, imageKind, isEpub, isPdf, safeBase } from './lib/validate.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.ADMIN_PORT) || 4000;
@@ -97,13 +97,14 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (p === '/api/upload') {
-      const { name, dataBase64, kind: what } = JSON.parse((await body(req)).toString('utf8'));
+      const { name, dataBase64, kind: what, format } = JSON.parse((await body(req)).toString('utf8'));
       const buf = Buffer.from(String(dataBase64 || ''), 'base64');
       if (what === 'sample') {
-        if (!isEpub(buf)) throw new Error('El archivo no es un EPUB válido.');
+        const ext = format === 'pdf' ? 'pdf' : 'epub';
+        if (!(ext === 'pdf' ? isPdf(buf) : isEpub(buf))) throw new Error(`El archivo no es un ${ext.toUpperCase()} válido.`);
         const dir = file('assets/muestras'); fs.mkdirSync(dir, { recursive: true });
-        const b = safeBase(name); let f = `${b}.epub`;
-        for (let i = 2; fs.existsSync(path.join(dir, f)); i++) f = `${b}-${i}.epub`;
+        const b = safeBase(name); let f = `${b}.${ext}`;
+        for (let i = 2; fs.existsSync(path.join(dir, f)); i++) f = `${b}-${i}.${ext}`;
         fs.writeFileSync(path.join(dir, f), buf);
         return json(res, 200, { ok: true, path: `/muestras/${f}`, kb: Math.round(buf.length / 1024) });
       }
